@@ -60,10 +60,7 @@ export function VoiceUploadPanel({ voiceFile, setVoiceFile }: VoiceUploadPanelPr
           <Mic className="w-5 h-5 text-accent" />
         </div>
         <div className="flex-1">
-          <div className="flex items-center gap-2">
             <h3 className="text-sm font-semibold text-foreground">Entrenamiento de Voz</h3>
-            <span className="text-[9px] font-mono px-1.5 py-0.5 rounded-full bg-accent/15 text-accent">BETA</span>
-          </div>
           <p className="text-[11px] text-muted-foreground">Clona tu voz para canciones personalizadas</p>
         </div>
         <Tooltip>

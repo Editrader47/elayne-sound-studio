@@ -1,5 +1,5 @@
-import { useRef } from 'react';
-import { Sparkles, Loader2, Music, Zap } from 'lucide-react';
+import { useRef, useState } from 'react';
+import { Sparkles, Loader2, Music, Zap, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -8,13 +8,14 @@ import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { useAudioStore } from '@/lib/audio-store';
 import { generateTrack } from '@/lib/mock-ai-service';
+import { saveSongToDB, updateAliencoins } from '@/lib/db-service';
+import { useAuth } from '@/hooks/use-auth';
 import { motion, AnimatePresence } from 'framer-motion';
 import { LyricsPanel } from './LyricsPanel';
 import { VoiceUploadPanel } from './VoiceUploadPanel';
 import { EngineToggle } from './EngineToggle';
 import { QuickTags } from './QuickTags';
 import { toast } from '@/hooks/use-toast';
-import { useState } from 'react';
 
 const GENRES = [
   'Reggaeton', 'Rock', 'Lo-fi', 'Trap', 'Pop', 'Hip-Hop',
@@ -23,10 +24,11 @@ const GENRES = [
 
 export function StudioPanel() {
   const {
-    engine, isGenerating, setIsGenerating, addTrack, setCurrentTrack, spendCoins,
+    engine, isGenerating, setIsGenerating, addTrack, setCurrentTrack, spendCoins, aliencoins,
     studioPrompt, setStudioPrompt, studioGenre, setStudioGenre,
     studioLyrics, setStudioLyrics, studioLyricsEnabled, setStudioLyricsEnabled,
   } = useAudioStore();
+  const { user } = useAuth();
 
   const [instrumental, setInstrumental] = useState(false);
   const [highQuality, setHighQuality] = useState(true);
@@ -86,6 +88,14 @@ export function StudioPanel() {
       });
       addTrack(track);
       setCurrentTrack(track);
+      
+      // Save to database
+      if (user) {
+        const newBalance = aliencoins - cost;
+        await saveSongToDB(track, user.id);
+        await updateAliencoins(user.id, newBalance);
+      }
+      
       setStudioPrompt('');
     } finally {
       setIsGenerating(false);
@@ -113,10 +123,10 @@ export function StudioPanel() {
         </div>
         <div>
           <h2 className="text-lg font-semibold text-foreground">
-            Panel de Generación · <span style={{ color: `hsl(${engineColor})` }}>{engine.toUpperCase()}</span>
+            Panel de Generación
           </h2>
           <p className="text-xs text-muted-foreground">
-            {isSuno ? 'Generación rápida con prompt simple.' : 'Fidelidad pro con editor avanzado de letras.'}
+            Configura y genera tu próxima creación musical
           </p>
         </div>
       </div>
@@ -177,11 +187,10 @@ export function StudioPanel() {
             className="space-y-3 overflow-hidden"
           >
             <div className="flex items-center gap-2 mb-1">
-              <div className="w-6 h-6 rounded-md bg-[hsl(var(--juno)/0.15)] flex items-center justify-center">
-                <span className="text-xs font-bold text-[hsl(var(--juno))]">J</span>
+              <div className="w-6 h-6 rounded-md bg-accent/15 flex items-center justify-center">
+                <FileText className="w-3.5 h-3.5 text-accent" />
               </div>
-              <Label className="text-sm font-semibold text-foreground">Editor de Letras Pro</Label>
-              <span className="text-[9px] font-mono px-1.5 py-0.5 rounded-full bg-[hsl(var(--juno)/0.15)] text-[hsl(var(--juno))]">JUNO</span>
+              <Label className="text-sm font-semibold text-foreground">Editor Avanzado de Letras</Label>
             </div>
 
             <QuickTags onInsert={handleInsertTag} />
@@ -234,7 +243,7 @@ export function StudioPanel() {
         ) : (
           <span className="flex items-center gap-2">
             <Sparkles className="w-5 h-5" />
-            Generar {isJuno ? 'Pro' : 'Magia'} · {isJuno ? '10' : '5'} AC
+            Generar · {isJuno ? '10' : '5'} AC
           </span>
         )}
       </Button>

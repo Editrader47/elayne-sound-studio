@@ -69,7 +69,7 @@ export function TrackCard({ track, index }: { track: Track; index: number }) {
                 color: `hsl(${engineColor})`,
               }}
             >
-              {track.engine?.toUpperCase() || 'SUNO'}
+              {isSuno ? 'Rápido' : 'Pro'}
             </span>
             {track.instrumental && (
               <span className="text-[10px] font-mono text-muted-foreground/60">INST</span>

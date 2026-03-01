@@ -64,7 +64,6 @@ function EngineButton({
       <span className="relative flex items-center gap-2">
         {icon}
         <span>{label}</span>
-        <span className="text-[10px] font-mono opacity-70">({sublabel})</span>
       </span>
     </button>
   );

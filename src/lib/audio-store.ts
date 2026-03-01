@@ -52,6 +52,7 @@ interface AudioState {
 
   // Economy
   aliencoins: number;
+  setAliencoins: (coins: number) => void;
   spendCoins: (amount: number) => boolean;
   addCoins: (amount: number) => void;
 
@@ -145,6 +146,7 @@ export const useAudioStore = create<AudioState>((set, get) => ({
   setEngine: (engine) => set({ engine }),
 
   aliencoins: 100,
+  setAliencoins: (aliencoins) => set({ aliencoins }),
   spendCoins: (amount) => {
     const current = get().aliencoins;
     if (current < amount) return false;

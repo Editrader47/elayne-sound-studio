@@ -69,7 +69,7 @@ export function AppSidebar() {
 
       <SidebarFooter className="p-4">
         {!collapsed && (
-          <p className="text-[10px] text-muted-foreground/40 font-mono">v2.0 · JUNO/SUNO</p>
+          <p className="text-[10px] text-muted-foreground/40 font-mono">v2.0 · ELAYNE</p>
         )}
       </SidebarFooter>
     </Sidebar>
