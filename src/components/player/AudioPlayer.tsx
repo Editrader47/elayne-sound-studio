@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { Play, Pause, SkipBack, SkipForward, Volume2, VolumeX } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
@@ -14,45 +14,94 @@ function formatTime(s: number): string {
 const SPEEDS = [0.5, 0.75, 1, 1.25, 1.5, 2];
 
 export function AudioPlayer() {
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   const {
     currentTrack, isPlaying, currentTime, volume, speed,
     togglePlay, setCurrentTime, setVolume, setSpeed, setIsPlaying,
   } = useAudioStore();
 
-  // Simulate playback progress
+  // Create / update audio element
   useEffect(() => {
-    if (!isPlaying || !currentTrack) return;
-    const interval = setInterval(() => {
-      const store = useAudioStore.getState();
-      const next = store.currentTime + 0.1 * store.speed;
-      if (next >= currentTrack.duration) {
-        store.setIsPlaying(false);
-        store.setCurrentTime(0);
-      } else {
-        store.setCurrentTime(next);
-      }
-    }, 100);
-    return () => clearInterval(interval);
-  }, [isPlaying, currentTrack]);
+    if (!currentTrack) return;
+    
+    const audioUrl = currentTrack.audioUrl || 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3';
+    
+    if (!audioRef.current) {
+      audioRef.current = new Audio(audioUrl);
+    } else {
+      audioRef.current.src = audioUrl;
+    }
+    
+    const audio = audioRef.current;
+    audio.currentTime = 0;
+    useAudioStore.getState().setCurrentTime(0);
+    
+    audio.ontimeupdate = () => {
+      useAudioStore.getState().setCurrentTime(audio.currentTime);
+    };
+    audio.onended = () => {
+      useAudioStore.getState().setIsPlaying(false);
+      useAudioStore.getState().setCurrentTime(0);
+    };
+    
+    if (useAudioStore.getState().isPlaying) {
+      audio.play().catch(() => {});
+    }
+    
+    return () => {
+      audio.ontimeupdate = null;
+      audio.onended = null;
+    };
+  }, [currentTrack?.id]);
+
+  // Play / pause
+  useEffect(() => {
+    if (!audioRef.current) return;
+    if (isPlaying) {
+      audioRef.current.play().catch(() => {});
+    } else {
+      audioRef.current.pause();
+    }
+  }, [isPlaying]);
+
+  // Volume
+  useEffect(() => {
+    if (audioRef.current) audioRef.current.volume = volume;
+  }, [volume]);
+
+  // Speed
+  useEffect(() => {
+    if (audioRef.current) audioRef.current.playbackRate = speed;
+  }, [speed]);
 
   if (!currentTrack) {
     return (
       <div className="fixed bottom-0 left-0 right-0 z-50 h-20 bg-[hsl(var(--player-bg))] border-t border-border/30 flex items-center justify-center">
-        <p className="text-muted-foreground/50 text-sm font-mono">No track selected</p>
+        <p className="text-muted-foreground/50 text-sm font-mono">Sin pista seleccionada</p>
       </div>
     );
   }
+
+  const duration = audioRef.current?.duration || currentTrack.duration;
 
   const nextSpeed = () => {
     const idx = SPEEDS.indexOf(speed);
     setSpeed(SPEEDS[(idx + 1) % SPEEDS.length]);
   };
 
+  const handleSeek = (pct: number) => {
+    const time = pct * duration;
+    setCurrentTime(time);
+    if (audioRef.current) {
+      audioRef.current.currentTime = time;
+    }
+  };
+
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 bg-[hsl(var(--player-bg))]/95 backdrop-blur-xl border-t border-border/30">
       {/* Waveform */}
       <div className="px-4 pt-2">
-        <WaveformVisualizer />
+        <WaveformVisualizer onSeek={handleSeek} duration={duration} />
       </div>
 
       <div className="px-4 pb-3 pt-1 flex items-center gap-4">
@@ -84,7 +133,7 @@ export function AudioPlayer() {
         <div className="hidden md:flex items-center gap-2 text-[11px] font-mono text-muted-foreground">
           <span>{formatTime(currentTime)}</span>
           <span>/</span>
-          <span>{formatTime(currentTrack.duration)}</span>
+          <span>{formatTime(duration)}</span>
         </div>
 
         {/* Spacer */}

@@ -11,7 +11,7 @@ import { motion } from 'framer-motion';
 
 const GENRES = [
   'Reggaeton', 'Rock', 'Lo-fi', 'Trap', 'Pop', 'Hip-Hop',
-  'EDM', 'Jazz', 'Classical', 'Synthwave', 'R&B', 'Ambient',
+  'EDM', 'Jazz', 'Clásica', 'Synthwave', 'R&B', 'Ambient',
 ];
 
 export function StudioPanel() {
@@ -47,25 +47,25 @@ export function StudioPanel() {
           <Zap className="w-5 h-5 text-primary" />
         </div>
         <div>
-          <h2 className="text-lg font-semibold text-foreground">Generation Command</h2>
-          <p className="text-xs text-muted-foreground">Describe your sound. AI does the rest.</p>
+          <h2 className="text-lg font-semibold text-foreground">Comando de Generación</h2>
+          <p className="text-xs text-muted-foreground">Describe tu sonido. La IA hace el resto.</p>
         </div>
       </div>
 
       {/* Prompt */}
       <div className="space-y-2">
-        <Label className="text-xs uppercase tracking-wider text-muted-foreground">Song Prompt</Label>
+        <Label className="text-xs uppercase tracking-wider text-muted-foreground">Prompt de Canción</Label>
         <Textarea
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
-          placeholder="A dreamy lo-fi beat with warm piano chords, soft vinyl crackle, and gentle rain in the background..."
+          placeholder="Un beat lo-fi soñador con acordes cálidos de piano, suave crujido de vinilo y lluvia de fondo..."
           className="min-h-[120px] bg-secondary/50 border-border/40 text-foreground placeholder:text-muted-foreground/40 resize-none focus:border-primary/50 focus:ring-primary/20 text-sm"
         />
       </div>
 
       {/* Genre */}
       <div className="space-y-2">
-        <Label className="text-xs uppercase tracking-wider text-muted-foreground">Musical Genre</Label>
+        <Label className="text-xs uppercase tracking-wider text-muted-foreground">Género Musical</Label>
         <Select value={genre} onValueChange={setGenre}>
           <SelectTrigger className="bg-secondary/50 border-border/40">
             <SelectValue />
@@ -91,7 +91,7 @@ export function StudioPanel() {
         </div>
         <div className="flex items-center gap-3">
           <Switch checked={highQuality} onCheckedChange={setHighQuality} />
-          <Label className="text-sm text-foreground/80">High Quality Render</Label>
+          <Label className="text-sm text-foreground/80">Render Alta Calidad</Label>
         </div>
       </div>
 
@@ -105,12 +105,12 @@ export function StudioPanel() {
         {isGenerating ? (
           <span className="flex items-center gap-2">
             <Loader2 className="w-5 h-5 animate-spin" />
-            Generating Magic...
+            Generando Magia...
           </span>
         ) : (
           <span className="flex items-center gap-2">
             <Sparkles className="w-5 h-5" />
-            Generate Magic
+            Generar Magia
           </span>
         )}
       </Button>
