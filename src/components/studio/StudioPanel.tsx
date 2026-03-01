@@ -47,14 +47,14 @@ export function StudioPanel() {
           <Zap className="w-5 h-5 text-primary" />
         </div>
         <div>
-          <h2 className="text-lg font-semibold text-foreground">Comando de Generación</h2>
+          <h2 className="text-lg font-semibold text-foreground">Panel de Generación</h2>
           <p className="text-xs text-muted-foreground">Describe tu sonido. La IA hace el resto.</p>
         </div>
       </div>
 
       {/* Prompt */}
       <div className="space-y-2">
-        <Label className="text-xs uppercase tracking-wider text-muted-foreground">Prompt de Canción</Label>
+        <Label className="text-xs uppercase tracking-wider text-muted-foreground">Descripción de la Canción</Label>
         <Textarea
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
