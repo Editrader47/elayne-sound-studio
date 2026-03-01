@@ -28,11 +28,11 @@ export function AppSidebar() {
     <Sidebar collapsible="icon" className="border-r border-border/30">
       <SidebarHeader className="p-4">
         <div className="flex items-center gap-3">
-          <img src={elayneLogoImg} alt="ELAYNE IA SOUND" className="w-9 h-9 rounded-lg object-contain" />
+          <img src={elayneLogoImg} alt="ELAYNE IA SOUND" className="w-10 h-10 object-contain" />
           {!collapsed && (
             <div>
-              <h1 className="text-lg font-black tracking-wider neon-logo">ELAYNE</h1>
-              <p className="text-[10px] font-mono tracking-widest neon-logo opacity-80">IA SOUND</p>
+              <h1 className="text-xl font-black tracking-wider neon-logo">ELAYNE</h1>
+              <p className="text-[11px] font-mono tracking-widest neon-logo opacity-80">IA SOUND</p>
             </div>
           )}
         </div>
