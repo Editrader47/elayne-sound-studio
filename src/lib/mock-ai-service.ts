@@ -1,4 +1,4 @@
-import { Track } from './audio-store';
+import { Track, EngineMode } from './audio-store';
 
 const TITLE_WORDS = [
   ['Crystal', 'Velvet', 'Cosmic', 'Digital', 'Lunar', 'Ember', 'Quantum', 'Shadow'],
@@ -24,8 +24,11 @@ export async function generateTrack(params: {
   genre: string;
   instrumental: boolean;
   highQuality: boolean;
+  engine: EngineMode;
+  lyrics?: string;
 }): Promise<Track> {
-  await new Promise((r) => setTimeout(r, 3000 + Math.random() * 2000));
+  const delay = params.engine === 'juno' ? 4000 + Math.random() * 3000 : 2000 + Math.random() * 2000;
+  await new Promise((r) => setTimeout(r, delay));
 
   return {
     id: crypto.randomUUID(),
@@ -37,5 +40,7 @@ export async function generateTrack(params: {
     instrumental: params.instrumental,
     highQuality: params.highQuality,
     audioUrl: SAMPLE_AUDIO_URLS[Math.floor(Math.random() * SAMPLE_AUDIO_URLS.length)],
+    engine: params.engine,
+    lyrics: params.lyrics,
   };
 }

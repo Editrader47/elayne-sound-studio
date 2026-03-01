@@ -1,4 +1,4 @@
-import { Library, Sparkles, Mic } from 'lucide-react';
+import { Library, Sparkles, Mic, FlaskConical } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import elayneLogoImg from '@/assets/elayne-logo.png';
 import {
@@ -19,6 +19,7 @@ const navItems = [
   { title: 'Estudio', url: '/', icon: Sparkles },
   { title: 'Biblioteca', url: '/library', icon: Library },
   { title: 'Mis Voces', url: '/voices', icon: Mic },
+  { title: 'Lab de Voz', url: '/voice-lab', icon: FlaskConical },
 ];
 
 export function AppSidebar() {
@@ -68,7 +69,7 @@ export function AppSidebar() {
 
       <SidebarFooter className="p-4">
         {!collapsed && (
-          <p className="text-[10px] text-muted-foreground/40 font-mono">v1.0 · MVP</p>
+          <p className="text-[10px] text-muted-foreground/40 font-mono">v2.0 · JUNO/SUNO</p>
         )}
       </SidebarFooter>
     </Sidebar>
