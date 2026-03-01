@@ -1,5 +1,6 @@
-import { Library, Sparkles, Headphones } from 'lucide-react';
+import { Library, Sparkles } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
+import elayneLogoImg from '@/assets/elayne-logo.png';
 import {
   Sidebar,
   SidebarContent,
@@ -27,13 +28,11 @@ export function AppSidebar() {
     <Sidebar collapsible="icon" className="border-r border-border/30">
       <SidebarHeader className="p-4">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-lg bg-primary/20 flex items-center justify-center glow-border">
-            <Headphones className="w-5 h-5 text-primary" />
-          </div>
+          <img src={elayneLogoImg} alt="ELAYNE IA SOUND" className="w-9 h-9 rounded-lg object-contain" />
           {!collapsed && (
             <div>
               <h1 className="text-lg font-black tracking-wider neon-logo">ELAYNE</h1>
-              <p className="text-[10px] font-mono tracking-widest neon-logo opacity-80">IA SOUND 👽</p>
+              <p className="text-[10px] font-mono tracking-widest neon-logo opacity-80">IA SOUND</p>
             </div>
           )}
         </div>
