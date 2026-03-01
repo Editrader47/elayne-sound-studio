@@ -1,12 +1,21 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { StudioPanel } from '@/components/studio/StudioPanel';
+import { LibraryGrid } from '@/components/library/LibraryGrid';
 
 const Index = () => {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
+    <div className="space-y-8 animate-slide-up">
+      <div>
+        <h1 className="text-2xl md:text-3xl font-bold text-foreground tracking-tight">
+          Studio
+        </h1>
+        <p className="text-sm text-muted-foreground mt-1">
+          Create AI-powered music in seconds
+        </p>
       </div>
+
+      <StudioPanel />
+
+      <LibraryGrid limit={6} />
     </div>
   );
 };
