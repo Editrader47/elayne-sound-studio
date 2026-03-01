@@ -1,4 +1,4 @@
-import { Library, Sparkles } from 'lucide-react';
+import { Library, Sparkles, Mic } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import elayneLogoImg from '@/assets/elayne-logo.png';
 import {
@@ -18,6 +18,7 @@ import {
 const navItems = [
   { title: 'Estudio', url: '/', icon: Sparkles },
   { title: 'Biblioteca', url: '/library', icon: Library },
+  { title: 'Mis Voces', url: '/voices', icon: Mic },
 ];
 
 export function AppSidebar() {

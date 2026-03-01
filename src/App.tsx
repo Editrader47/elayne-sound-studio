@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
 import Index from "./pages/Index";
 import LibraryPage from "./pages/LibraryPage";
+import VoicesPage from "./pages/VoicesPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -20,6 +21,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/library" element={<LibraryPage />} />
+            <Route path="/voices" element={<VoicesPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AppLayout>

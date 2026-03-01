@@ -5,9 +5,12 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
+import { Separator } from '@/components/ui/separator';
 import { useAudioStore } from '@/lib/audio-store';
 import { generateTrack } from '@/lib/mock-ai-service';
 import { motion } from 'framer-motion';
+import { LyricsPanel } from './LyricsPanel';
+import { VoiceUploadPanel } from './VoiceUploadPanel';
 
 const GENRES = [
   'Reggaeton', 'Rock', 'Lo-fi', 'Trap', 'Pop', 'Hip-Hop',
@@ -19,6 +22,14 @@ export function StudioPanel() {
   const [genre, setGenre] = useState('Lo-fi');
   const [instrumental, setInstrumental] = useState(false);
   const [highQuality, setHighQuality] = useState(true);
+
+  // Lyrics state
+  const [lyricsEnabled, setLyricsEnabled] = useState(false);
+  const [lyrics, setLyrics] = useState('');
+  const [syncLyrics, setSyncLyrics] = useState(true);
+
+  // Voice state
+  const [voiceFile, setVoiceFile] = useState<File | null>(null);
 
   const { isGenerating, setIsGenerating, addTrack, setCurrentTrack } = useAudioStore();
 
@@ -94,6 +105,23 @@ export function StudioPanel() {
           <Label className="text-sm text-foreground/80">Render Alta Calidad</Label>
         </div>
       </div>
+
+      <Separator className="bg-border/30" />
+
+      {/* Lyrics Module */}
+      <LyricsPanel
+        lyrics={lyrics}
+        setLyrics={setLyrics}
+        syncLyrics={syncLyrics}
+        setSyncLyrics={setSyncLyrics}
+        enabled={lyricsEnabled}
+        setEnabled={setLyricsEnabled}
+      />
+
+      <Separator className="bg-border/30" />
+
+      {/* Voice Upload */}
+      <VoiceUploadPanel voiceFile={voiceFile} setVoiceFile={setVoiceFile} />
 
       {/* Generate */}
       <Button
