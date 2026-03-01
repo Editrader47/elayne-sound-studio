@@ -32,8 +32,8 @@ export function AppSidebar() {
           </div>
           {!collapsed && (
             <div>
-              <h1 className="text-base font-black tracking-wider neon-logo">ELAYNE</h1>
-              <p className="text-[10px] font-mono tracking-widest neon-logo opacity-80">IA SOUND</p>
+              <h1 className="text-lg font-black tracking-wider neon-logo">ELAYNE</h1>
+              <p className="text-[10px] font-mono tracking-widest neon-logo opacity-80">IA SOUND 👽</p>
             </div>
           )}
         </div>
