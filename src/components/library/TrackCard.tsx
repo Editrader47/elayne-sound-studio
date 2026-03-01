@@ -29,6 +29,7 @@ function downloadFile(url: string, filename: string) {
 export function TrackCard({ track, index }: { track: Track; index: number }) {
   const { currentTrack, isPlaying, setCurrentTrack, togglePlay } = useAudioStore();
   const isActive = currentTrack?.id === track.id;
+  const isSuno = track.engine === 'suno';
 
   const handlePlay = () => {
     if (isActive) {
@@ -40,9 +41,10 @@ export function TrackCard({ track, index }: { track: Track; index: number }) {
 
   const handleDownload = (format: 'mp3' | 'wav') => {
     const url = track.audioUrl || 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3';
-    const ext = format;
-    downloadFile(url, `${track.title}.${ext}`);
+    downloadFile(url, `${track.title}.${format}`);
   };
+
+  const engineColor = isSuno ? 'var(--suno)' : 'var(--juno)';
 
   return (
     <motion.div
@@ -56,9 +58,18 @@ export function TrackCard({ track, index }: { track: Track; index: number }) {
       <div className="flex items-start justify-between">
         <div className="min-w-0 flex-1">
           <h3 className="text-sm font-semibold text-foreground truncate">{track.title}</h3>
-          <div className="flex items-center gap-2 mt-1">
+          <div className="flex items-center gap-2 mt-1 flex-wrap">
             <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-primary/10 text-primary">
               {track.genre}
+            </span>
+            <span
+              className="text-[10px] font-mono px-2 py-0.5 rounded-full"
+              style={{
+                background: `hsl(${engineColor} / 0.15)`,
+                color: `hsl(${engineColor})`,
+              }}
+            >
+              {track.engine?.toUpperCase() || 'SUNO'}
             </span>
             {track.instrumental && (
               <span className="text-[10px] font-mono text-muted-foreground/60">INST</span>
@@ -77,6 +88,13 @@ export function TrackCard({ track, index }: { track: Track; index: number }) {
           {isActive && isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4 ml-0.5" />}
         </Button>
       </div>
+
+      {/* Lyrics snippet */}
+      {track.lyrics && (
+        <p className="text-[10px] text-muted-foreground/60 font-mono truncate italic">
+          {track.lyrics.substring(0, 60)}...
+        </p>
+      )}
 
       {/* Bottom row */}
       <div className="flex items-center justify-between">

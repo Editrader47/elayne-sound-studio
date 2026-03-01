@@ -64,6 +64,15 @@ export default {
         surface: "hsl(var(--surface))",
         glow: "hsl(var(--glow))",
         waveform: "hsl(var(--waveform))",
+        suno: {
+          DEFAULT: "hsl(var(--suno))",
+          foreground: "hsl(var(--suno-foreground))",
+        },
+        juno: {
+          DEFAULT: "hsl(var(--juno))",
+          foreground: "hsl(var(--juno-foreground))",
+        },
+        aliencoin: "hsl(var(--aliencoin))",
       },
       borderRadius: {
         lg: "var(--radius)",
