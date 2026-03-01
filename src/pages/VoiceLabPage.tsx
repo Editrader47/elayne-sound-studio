@@ -93,10 +93,7 @@ const VoiceLabPage = () => {
             <FlaskConical className="w-5 h-5 text-[hsl(var(--juno))]" />
           </div>
           <div className="flex-1">
-            <div className="flex items-center gap-2">
-              <h3 className="text-sm font-semibold text-foreground">Entrenamiento Avanzado</h3>
-              <span className="text-[9px] font-mono px-1.5 py-0.5 rounded-full bg-[hsl(var(--juno)/0.15)] text-[hsl(var(--juno))]">BETA</span>
-            </div>
+            <h3 className="text-sm font-semibold text-foreground">Entrenamiento Avanzado</h3>
             <p className="text-[11px] text-muted-foreground">Sube audio limpio para el mejor resultado</p>
           </div>
           <Tooltip>
