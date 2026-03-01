@@ -1,7 +1,12 @@
 import { useEffect, useRef } from 'react';
 import { useAudioStore } from '@/lib/audio-store';
 
-export function WaveformVisualizer() {
+interface WaveformVisualizerProps {
+  onSeek?: (pct: number) => void;
+  duration?: number;
+}
+
+export function WaveformVisualizer({ onSeek, duration: durationProp }: WaveformVisualizerProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animRef = useRef<number>(0);
   const { isPlaying, currentTrack, currentTime } = useAudioStore();
@@ -11,7 +16,6 @@ export function WaveformVisualizer() {
     if (!canvas) return;
     const ctx = canvas.getContext('2d')!;
 
-    // Generate deterministic bars from track id
     const barCount = 80;
     const bars = Array.from({ length: barCount }, (_, i) => {
       const seed = currentTrack ? currentTrack.id.charCodeAt(i % currentTrack.id.length) : i;
@@ -27,22 +31,22 @@ export function WaveformVisualizer() {
 
       const barWidth = width / barCount;
       const gap = 2;
-      const progress = currentTrack ? currentTime / currentTrack.duration : 0;
+      const dur = durationProp || (currentTrack ? currentTrack.duration : 1);
+      const progress = currentTrack ? currentTime / dur : 0;
 
       bars.forEach((h, i) => {
         const x = i * barWidth;
         const barH = h * height * 0.8;
-        const y = (height - barH) / 2;
 
         const isPast = i / barCount < progress;
-        // Indigo for played, muted for unplayed
+        // Cyberpunk colors: neon cyan played, muted for unplayed
         ctx.fillStyle = isPast
-          ? 'hsl(239, 84%, 67%)'
+          ? 'hsl(330, 90%, 60%)'
           : 'hsl(222, 30%, 22%)';
 
-        // Animate if playing
+        // Stronger animation when playing
         const scale = isPlaying
-          ? 1 + Math.sin(Date.now() * 0.005 + i * 0.4) * 0.15
+          ? 1 + Math.sin(Date.now() * 0.008 + i * 0.5) * 0.25
           : 1;
 
         const scaledH = barH * scale;
@@ -58,7 +62,7 @@ export function WaveformVisualizer() {
 
     draw();
     return () => cancelAnimationFrame(animRef.current);
-  }, [isPlaying, currentTrack, currentTime]);
+  }, [isPlaying, currentTrack, currentTime, durationProp]);
 
   return (
     <canvas
@@ -68,7 +72,11 @@ export function WaveformVisualizer() {
         if (!currentTrack) return;
         const rect = e.currentTarget.getBoundingClientRect();
         const pct = (e.clientX - rect.left) / rect.width;
-        useAudioStore.getState().setCurrentTime(pct * currentTrack.duration);
+        if (onSeek) {
+          onSeek(pct);
+        } else {
+          useAudioStore.getState().setCurrentTime(pct * currentTrack.duration);
+        }
       }}
     />
   );

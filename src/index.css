@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
 @layer base {
   :root {
@@ -15,7 +15,7 @@
     --popover: 222 47% 9%;
     --popover-foreground: 210 40% 96%;
 
-    --primary: 239 84% 67%;
+    --primary: 330 90% 60%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 222 47% 14%;
@@ -24,36 +24,39 @@
     --muted: 222 30% 16%;
     --muted-foreground: 215 20% 55%;
 
-    --accent: 239 84% 67%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 170 90% 50%;
+    --accent-foreground: 0 0% 0%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
     --border: 222 30% 18%;
     --input: 222 30% 18%;
-    --ring: 239 84% 67%;
+    --ring: 330 90% 60%;
 
     --radius: 0.75rem;
 
     --sidebar-background: 222 47% 5%;
     --sidebar-foreground: 215 20% 65%;
-    --sidebar-primary: 239 84% 67%;
+    --sidebar-primary: 330 90% 60%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 222 47% 12%;
     --sidebar-accent-foreground: 210 40% 96%;
     --sidebar-border: 222 30% 14%;
-    --sidebar-ring: 239 84% 67%;
+    --sidebar-ring: 330 90% 60%;
 
     /* Custom tokens */
     --glass: 222 47% 10%;
     --glass-border: 222 30% 20%;
-    --glow: 239 84% 67%;
+    --glow: 330 90% 60%;
+    --glow-cyan: 180 100% 50%;
+    --glow-lime: 82 85% 55%;
     --surface: 222 47% 8%;
     --surface-hover: 222 47% 12%;
-    --waveform: 239 84% 67%;
-    --waveform-progress: 280 80% 60%;
+    --waveform: 180 100% 50%;
+    --waveform-progress: 330 90% 60%;
     --player-bg: 222 47% 4%;
+    --neon-gradient: linear-gradient(135deg, hsl(180, 100%, 50%), hsl(280, 80%, 60%));
   }
 
   .dark {
@@ -78,23 +81,32 @@
 
 @layer components {
   .glass-card {
-    @apply bg-card/60 backdrop-blur-xl border border-border/50 rounded-xl;
+    @apply bg-card/40 backdrop-blur-2xl border border-border/30 rounded-xl;
   }
 
   .glass-card-hover {
-    @apply glass-card transition-all duration-300 hover:bg-card/80 hover:border-primary/30 hover:shadow-[0_0_30px_-5px_hsl(var(--glow)/0.15)];
+    @apply glass-card transition-all duration-300 hover:bg-card/60 hover:border-primary/40 hover:shadow-[0_0_35px_-5px_hsl(var(--glow)/0.25)];
   }
 
   .glow-text {
-    @apply text-primary drop-shadow-[0_0_12px_hsl(var(--glow)/0.5)];
+    @apply text-primary drop-shadow-[0_0_16px_hsl(var(--glow)/0.6)];
   }
 
   .glow-border {
-    @apply border-primary/40 shadow-[0_0_20px_-5px_hsl(var(--glow)/0.2)];
+    @apply border-primary/50 shadow-[0_0_25px_-5px_hsl(var(--glow)/0.3)];
   }
 
   .glow-button {
-    @apply bg-primary text-primary-foreground font-semibold shadow-[0_0_30px_-5px_hsl(var(--glow)/0.4)] hover:shadow-[0_0_40px_-5px_hsl(var(--glow)/0.6)] transition-all duration-300;
+    @apply bg-primary text-primary-foreground font-semibold shadow-[0_0_35px_-5px_hsl(var(--glow)/0.5)] hover:shadow-[0_0_50px_-5px_hsl(var(--glow)/0.7)] transition-all duration-300;
+  }
+
+  .neon-logo {
+    font-family: 'Orbitron', sans-serif;
+    background: linear-gradient(135deg, hsl(180, 100%, 50%), hsl(280, 80%, 60%));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 0 20px hsl(180 100% 50% / 0.4));
   }
 
   .pulse-glow {

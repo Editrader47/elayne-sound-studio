@@ -5,10 +5,10 @@ const LibraryPage = () => {
     <div className="animate-slide-up">
       <div className="mb-8">
         <h1 className="text-2xl md:text-3xl font-bold text-foreground tracking-tight">
-          Library
+          Biblioteca
         </h1>
         <p className="text-sm text-muted-foreground mt-1">
-          All your generated tracks in one place
+          Todas tus pistas generadas en un solo lugar
         </p>
       </div>
 

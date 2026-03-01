@@ -18,14 +18,14 @@ export function LibraryGrid({ limit }: { limit?: number }) {
           <Music className="w-4 h-4 text-primary" />
         </div>
         <h2 className="text-lg font-semibold text-foreground">
-          {limit ? 'Recent Creations' : 'Your Library'}
+          {limit ? 'Creaciones Recientes' : 'Tu Biblioteca'}
         </h2>
-        <span className="text-xs font-mono text-muted-foreground/60">{tracks.length} tracks</span>
+        <span className="text-xs font-mono text-muted-foreground/60">{tracks.length} pistas</span>
       </div>
 
       {displayed.length === 0 ? (
         <div className="glass-card p-12 text-center">
-          <p className="text-muted-foreground/50 text-sm">No tracks yet. Generate your first one!</p>
+          <p className="text-muted-foreground/50 text-sm">No hay pistas aún. ¡Genera tu primera!</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">

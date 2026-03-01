@@ -45,6 +45,7 @@ const MOCK_TRACKS: Track[] = [
     prompt: 'Chill lo-fi beats with rain sounds and warm piano',
     instrumental: true,
     highQuality: true,
+    audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
   },
   {
     id: '2',
@@ -55,6 +56,7 @@ const MOCK_TRACKS: Track[] = [
     prompt: 'Dark trap beat with 808s and haunting melody',
     instrumental: true,
     highQuality: false,
+    audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3',
   },
   {
     id: '3',
@@ -65,6 +67,7 @@ const MOCK_TRACKS: Track[] = [
     prompt: 'Summer reggaeton vibes with tropical percussion',
     instrumental: false,
     highQuality: true,
+    audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3',
   },
   {
     id: '4',
@@ -75,6 +78,7 @@ const MOCK_TRACKS: Track[] = [
     prompt: 'Retro synthwave with driving arpeggios and analog warmth',
     instrumental: true,
     highQuality: true,
+    audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3',
   },
 ];
 

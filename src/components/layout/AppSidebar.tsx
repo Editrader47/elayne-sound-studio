@@ -1,4 +1,4 @@
-import { Music, Mic2, Library, Settings, Sparkles, Headphones } from 'lucide-react';
+import { Library, Sparkles, Headphones } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import {
   Sidebar,
@@ -15,8 +15,8 @@ import {
 } from '@/components/ui/sidebar';
 
 const navItems = [
-  { title: 'Studio', url: '/', icon: Sparkles },
-  { title: 'Library', url: '/library', icon: Library },
+  { title: 'Estudio', url: '/', icon: Sparkles },
+  { title: 'Biblioteca', url: '/library', icon: Library },
 ];
 
 export function AppSidebar() {
@@ -32,8 +32,8 @@ export function AppSidebar() {
           </div>
           {!collapsed && (
             <div>
-              <h1 className="text-sm font-bold tracking-wider text-foreground">ELAYNE</h1>
-              <p className="text-[10px] font-mono tracking-widest text-primary">IA SOUND</p>
+              <h1 className="text-base font-black tracking-wider neon-logo">ELAYNE</h1>
+              <p className="text-[10px] font-mono tracking-widest neon-logo opacity-80">IA SOUND</p>
             </div>
           )}
         </div>
@@ -42,7 +42,7 @@ export function AppSidebar() {
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel className="text-muted-foreground/60 text-[10px] tracking-widest uppercase">
-            {!collapsed && 'Navigate'}
+            {!collapsed && 'Navegar'}
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>

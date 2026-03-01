@@ -1,12 +1,29 @@
-import { Play, Pause, Download, Clock, Music } from 'lucide-react';
+import { useState } from 'react';
+import { Play, Pause, Download, Clock, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Track, useAudioStore } from '@/lib/audio-store';
 import { motion } from 'framer-motion';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 function formatDuration(s: number): string {
   const m = Math.floor(s / 60);
   const sec = Math.floor(s % 60);
   return `${m}:${sec.toString().padStart(2, '0')}`;
+}
+
+function downloadFile(url: string, filename: string) {
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.target = '_blank';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
 }
 
 export function TrackCard({ track, index }: { track: Track; index: number }) {
@@ -21,10 +38,17 @@ export function TrackCard({ track, index }: { track: Track; index: number }) {
     }
   };
 
+  const handleDownload = (format: 'mp3' | 'wav') => {
+    const url = track.audioUrl || 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3';
+    const ext = format;
+    downloadFile(url, `${track.title}.${ext}`);
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
+      whileHover={{ scale: 1.03, y: -2 }}
       transition={{ duration: 0.3, delay: index * 0.05 }}
       className={`glass-card-hover group p-4 space-y-3 ${isActive ? 'glow-border border-primary/30' : ''}`}
     >
@@ -62,14 +86,27 @@ export function TrackCard({ track, index }: { track: Track; index: number }) {
             {formatDuration(track.duration)}
           </span>
         </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-7 text-[11px] text-muted-foreground hover:text-foreground gap-1 opacity-0 group-hover:opacity-100 transition-opacity"
-        >
-          <Download className="w-3 h-3" />
-          WAV
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 text-[11px] text-muted-foreground hover:text-foreground gap-1 opacity-0 group-hover:opacity-100 transition-opacity"
+            >
+              <Download className="w-3 h-3" />
+              Descargar
+              <ChevronDown className="w-3 h-3" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="bg-card border-border">
+            <DropdownMenuItem onClick={() => handleDownload('mp3')}>
+              Descargar MP3
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleDownload('wav')}>
+              Descargar WAV
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </motion.div>
   );
