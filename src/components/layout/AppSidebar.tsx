@@ -35,6 +35,7 @@ export function AppSidebar() {
             <div className="text-center">
               <h1 className="text-xl font-black tracking-wider neon-logo">ELAYNE</h1>
               <p className="text-[11px] font-mono tracking-widest neon-logo opacity-80">IA SOUND</p>
+
             </div>
           )}
         </div>
