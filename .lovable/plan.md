@@ -1,53 +1,34 @@
 
 
-## Plan: Integrar Replicate MusicGen para generación real de audio
+## Plan: Desbloquear inputs del Studio y renombrar motores
 
-### Contexto
-Actualmente la app usa URLs de SoundHelix como placeholders y un servicio mock. El usuario quiere conectar Replicate (modelo `facebook/musicgen`) para generar audio real. No existe un secret `REPLICATE_API_TOKEN` configurado aún.
+### Cambios en `src/components/studio/StudioPanel.tsx`
 
-### Paso 1: Solicitar el API Token de Replicate
-- Usar la herramienta `add_secret` para pedir al usuario su `REPLICATE_API_TOKEN` (se obtiene en replicate.com/account/api-tokens).
-- **No se puede avanzar con la implementación hasta que el usuario ingrese el secret.**
+1. **Reemplazar Select de Género por Input de texto libre**
+   - Eliminar el `<Select>` dropdown (líneas 170-188) y reemplazarlo con un `<Input type="text">` que permita escribir cualquier estilo (ej: "Tecnocumbia Sonidera 132 BPM").
+   - Placeholder: `"Ej: Tecnocumbia sonidera, Reggaeton, Synthwave 130 BPM..."`.
+   - Debajo del input, agregar quick-tag buttons con los géneros populares (Reggaeton, Rock, Lo-fi, Trap, Pop, etc.) que al hacer clic rellenen el input.
+   - Mantener estilo glassmorphism: `bg-secondary/50 border-border/40`.
 
-### Paso 2: Eliminar muestras SoundHelix
-- **`src/lib/audio-store.ts`**: Vaciar el array `MOCK_TRACKS` (líneas 74-120). Inicializar `tracks: []`.
-- **`src/lib/mock-ai-service.ts`**: Eliminar las URLs de SoundHelix. En vez de devolver audio fake, lanzar un error indicando que el motor de IA no está disponible en modo demo.
+2. **Textarea sin restricciones**
+   - Confirmar que no hay `maxLength` en el textarea de prompt (no lo hay actualmente, solo verificar).
+   - Cambiar placeholder a: `"Describe tu ritmo aquí... Ej: Beat de tecnocumbia sonidera con sintetizadores brillantes y bajo pesado"`.
 
-### Paso 3: Actualizar Edge Function para Replicate
-- **`supabase/functions/generate-music/index.ts`**: Reemplazar la llamada genérica a `api.example.com` con la API de Replicate:
-  1. Crear una predicción via `POST https://api.replicate.com/v1/predictions` usando el modelo `facebook/musicgen`.
-  2. Implementar **polling** (cada 2-3 segundos) contra `GET /predictions/{id}` hasta que el estado sea `succeeded` o `failed`.
-  3. Usar el secret `REPLICATE_API_TOKEN` via `Deno.env.get()`.
-  4. Devolver `{ audio_url, title, duration }` al frontend.
-  5. Manejar errores (créditos agotados, timeout) con mensajes en español.
+3. **Eliminar import de Select** ya que no se usará más.
 
-### Paso 4: Actualizar servicio frontend
-- **`src/services/aiGenerator.ts`**: Ajustar para que si no hay `audio_url` en la respuesta, lance error en vez de crear un track sin audio. Eliminar el fallback a mock.
+4. **Eliminar la constante `GENRES`** (ya no necesaria como array cerrado, se convierte en quick-tags).
 
-### Paso 5: Actualizar mensajes de carga
-- **`src/components/studio/StudioPanel.tsx`**: Cambiar los mensajes rotativos para incluir "ELAYNE está componiendo tu música original..." como mensaje principal.
+### Cambios en `src/components/studio/EngineToggle.tsx`
 
-### Paso 6: Guardar audio real en DB
-- Ya está implementado en `StudioPanel.tsx` via `saveSongToDB()`. Solo hay que confirmar que el `audio_url` real de Replicate se pasa correctamente al track.
+5. **Renombrar labels de motores**
+   - "Rápido" → "Modo Rápido"
+   - "Fidelidad Pro" → "Modo Pro"
 
-### Detalle técnico: Flujo Replicate
+### Cambios en `src/components/studio/StudioPanel.tsx` (botón)
 
-```text
-Frontend                    Edge Function                Replicate API
-   |                            |                            |
-   |-- invoke(generate-music) ->|                            |
-   |                            |-- POST /predictions ------>|
-   |                            |<-- { id, status } ---------|
-   |                            |                            |
-   |                            |-- GET /predictions/{id} -->|  (poll)
-   |                            |<-- { status: processing } -|
-   |                            |   ... repeat every 3s ...  |
-   |                            |<-- { status: succeeded,    |
-   |                            |      output: audio_url } --|
-   |                            |                            |
-   |<-- { audio_url, title } ---|                            |
-```
+6. **Renombrar texto del botón**
+   - Cambiar "Generar" a "Generar Magia" en el botón.
 
-### Nota sobre `VITE_AI_API_KEY`
-El usuario menciona esta variable, pero los secrets del frontend (`VITE_*`) son públicos. El token de Replicate es privado y debe vivir solo en el Edge Function como `REPLICATE_API_TOKEN`. Se le explicará esto al usuario.
+### Sin cambios en backend
+- El `generateMusic` service ya envía `genre` como string libre al Edge Function. No requiere modificación.
 
