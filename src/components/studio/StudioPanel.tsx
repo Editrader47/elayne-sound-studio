@@ -7,7 +7,7 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { useAudioStore } from '@/lib/audio-store';
-import { generateTrack } from '@/lib/mock-ai-service';
+import { generateMusic } from '@/services/aiGenerator';
 import { saveSongToDB, updateAliencoins } from '@/lib/db-service';
 import { useAuth } from '@/hooks/use-auth';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -34,6 +34,7 @@ export function StudioPanel() {
   const [highQuality, setHighQuality] = useState(true);
   const [syncLyrics, setSyncLyrics] = useState(true);
   const [voiceFile, setVoiceFile] = useState<File | null>(null);
+  const [loadingMessage, setLoadingMessage] = useState('');
 
   const lyricsRef = useRef<HTMLTextAreaElement>(null);
 
@@ -77,8 +78,23 @@ export function StudioPanel() {
       });
 
     setIsGenerating(true);
+    setLoadingMessage('Conectando con el satélite musical...');
+
+    // Rotate loading messages
+    const messages = [
+      'Conectando con el satélite musical...',
+      'Generando audio único...',
+      'Procesando ondas sonoras...',
+      'Casi listo, afinando frecuencias...',
+    ];
+    let msgIdx = 0;
+    const msgInterval = setInterval(() => {
+      msgIdx = (msgIdx + 1) % messages.length;
+      setLoadingMessage(messages[msgIdx]);
+    }, 2500);
+
     try {
-      const track = await generateTrack({
+      const track = await generateMusic({
         prompt: studioPrompt,
         genre: studioGenre,
         instrumental,
@@ -97,7 +113,15 @@ export function StudioPanel() {
       }
       
       setStudioPrompt('');
+    } catch (err: any) {
+      toast({
+        title: '❌ Error de generación',
+        description: err?.message || 'Error de conexión con el motor de IA. Inténtalo de nuevo.',
+        variant: 'destructive',
+      });
     } finally {
+      clearInterval(msgInterval);
+      setLoadingMessage('');
       setIsGenerating(false);
     }
   };
@@ -238,7 +262,7 @@ export function StudioPanel() {
         {isGenerating ? (
           <span className="flex items-center gap-2">
             <Loader2 className="w-5 h-5 animate-spin" />
-            Generando...
+            {loadingMessage || 'Generando...'}
           </span>
         ) : (
           <span className="flex items-center gap-2">
