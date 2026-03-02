@@ -1,25 +1,9 @@
-import { Track, EngineMode } from './audio-store';
+import type { Track, EngineMode } from './audio-store';
 
-const TITLE_WORDS = [
-  ['Crystal', 'Velvet', 'Cosmic', 'Digital', 'Lunar', 'Ember', 'Quantum', 'Shadow'],
-  ['Pulse', 'Dreams', 'Echoes', 'Flames', 'Waves', 'Storm', 'Bloom', 'Drift'],
-];
-
-const SAMPLE_AUDIO_URLS = [
-  'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
-  'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3',
-  'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3',
-  'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3',
-  'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3',
-];
-
-function randomTitle(): string {
-  const a = TITLE_WORDS[0][Math.floor(Math.random() * TITLE_WORDS[0].length)];
-  const b = TITLE_WORDS[1][Math.floor(Math.random() * TITLE_WORDS[1].length)];
-  return `${a} ${b}`;
-}
-
-export async function generateTrack(params: {
+/**
+ * Mock service disabled — real AI generation is required.
+ */
+export async function generateTrack(_params: {
   prompt: string;
   genre: string;
   instrumental: boolean;
@@ -27,20 +11,5 @@ export async function generateTrack(params: {
   engine: EngineMode;
   lyrics?: string;
 }): Promise<Track> {
-  const delay = params.engine === 'juno' ? 4000 + Math.random() * 3000 : 2000 + Math.random() * 2000;
-  await new Promise((r) => setTimeout(r, delay));
-
-  return {
-    id: crypto.randomUUID(),
-    title: randomTitle(),
-    genre: params.genre,
-    duration: Math.floor(120 + Math.random() * 180),
-    createdAt: new Date(),
-    prompt: params.prompt,
-    instrumental: params.instrumental,
-    highQuality: params.highQuality,
-    audioUrl: SAMPLE_AUDIO_URLS[Math.floor(Math.random() * SAMPLE_AUDIO_URLS.length)],
-    engine: params.engine,
-    lyrics: params.lyrics,
-  };
+  throw new Error('Motor de IA no disponible en modo demo. Configura tu API Token para generar música real.');
 }

@@ -82,8 +82,9 @@ export function StudioPanel() {
 
     // Rotate loading messages
     const messages = [
+      'ELAYNE está componiendo tu música original...',
       'Conectando con el satélite musical...',
-      'Generando audio único...',
+      'Generando audio con IA...',
       'Procesando ondas sonoras...',
       'Casi listo, afinando frecuencias...',
     ];

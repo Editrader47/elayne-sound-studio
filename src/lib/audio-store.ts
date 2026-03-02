@@ -71,60 +71,8 @@ interface AudioState {
   setStudioLyricsEnabled: (enabled: boolean) => void;
 }
 
-const MOCK_TRACKS: Track[] = [
-  {
-    id: '1',
-    title: 'Neon Horizons',
-    genre: 'Lo-fi',
-    duration: 192,
-    createdAt: new Date('2026-02-28'),
-    prompt: 'Chill lo-fi beats with rain sounds and warm piano',
-    instrumental: true,
-    highQuality: true,
-    audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
-    engine: 'suno',
-  },
-  {
-    id: '2',
-    title: 'Midnight Flow',
-    genre: 'Trap',
-    duration: 214,
-    createdAt: new Date('2026-02-27'),
-    prompt: 'Dark trap beat with 808s and haunting melody',
-    instrumental: true,
-    highQuality: false,
-    audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3',
-    engine: 'suno',
-  },
-  {
-    id: '3',
-    title: 'Solar Waves',
-    genre: 'Reggaeton',
-    duration: 178,
-    createdAt: new Date('2026-02-26'),
-    prompt: 'Summer reggaeton vibes with tropical percussion',
-    instrumental: false,
-    highQuality: true,
-    audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3',
-    engine: 'juno',
-    lyrics: '[Verso 1]\nBajo el sol tropical\ncaminando sin parar...',
-  },
-  {
-    id: '4',
-    title: 'Electric Dreams',
-    genre: 'Synthwave',
-    duration: 245,
-    createdAt: new Date('2026-02-25'),
-    prompt: 'Retro synthwave with driving arpeggios and analog warmth',
-    instrumental: true,
-    highQuality: true,
-    audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3',
-    engine: 'juno',
-  },
-];
-
 export const useAudioStore = create<AudioState>((set, get) => ({
-  tracks: MOCK_TRACKS,
+  tracks: [],
   addTrack: (track) => set((s) => ({ tracks: [track, ...s.tracks] })),
 
   currentTrack: null,
