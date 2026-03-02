@@ -12,30 +12,27 @@ export function EngineToggle() {
         active={engine === 'suno'}
         onClick={() => setEngine('suno')}
         icon={<Zap className="w-3.5 h-3.5" />}
-        label="Suno"
-        sublabel="Rápido"
+        label="Rápido"
       />
       <EngineButton
         mode="juno"
         active={engine === 'juno'}
         onClick={() => setEngine('juno')}
         icon={<Crown className="w-3.5 h-3.5" />}
-        label="Juno"
-        sublabel="Fidelidad Pro"
+        label="Fidelidad Pro"
       />
     </div>
   );
 }
 
 function EngineButton({
-  mode, active, onClick, icon, label, sublabel,
+  mode, active, onClick, icon, label,
 }: {
   mode: EngineMode;
   active: boolean;
   onClick: () => void;
   icon: React.ReactNode;
   label: string;
-  sublabel: string;
 }) {
   const isSuno = mode === 'suno';
   const activeClass = isSuno

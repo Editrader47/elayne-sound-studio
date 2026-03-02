@@ -71,10 +71,10 @@ export function StudioPanel() {
       return;
     }
 
-    toast({
-      title: `⚡ -${cost} Aliencoins usados`,
-      description: `Motor ${engine.toUpperCase()} activado.`,
-    });
+      toast({
+        title: `⚡ -${cost} Aliencoins usados`,
+        description: 'Motor de generación activado.',
+      });
 
     setIsGenerating(true);
     try {
@@ -238,7 +238,7 @@ export function StudioPanel() {
         {isGenerating ? (
           <span className="flex items-center gap-2">
             <Loader2 className="w-5 h-5 animate-spin" />
-            {isJuno ? 'Procesando Fidelidad Pro...' : 'Generando Magia...'}
+            Generando...
           </span>
         ) : (
           <span className="flex items-center gap-2">

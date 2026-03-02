@@ -23,13 +23,21 @@ const VoiceLabPage = () => {
   const { voiceProfiles, addVoiceProfile } = useAudioStore();
 
   const handleFile = useCallback((file: File) => {
-    const valid = ['audio/mpeg', 'audio/wav', 'audio/mp3', 'audio/x-wav'];
-    if (!valid.some((t) => file.type.includes(t.split('/')[1]))) return;
-    setVoiceFile(file);
-    setAnalyzing(true);
-    setDone(false);
-    setProgress(0);
-    setQuality(0);
+    try {
+      const valid = ['audio/mpeg', 'audio/wav', 'audio/mp3', 'audio/x-wav'];
+      if (!valid.some((t) => file.type.includes(t.split('/')[1]))) {
+        toast({ title: '⚠️ Formato no válido', description: 'Solo WAV o MP3.', variant: 'destructive' });
+        return;
+      }
+      setVoiceFile(file);
+      setAnalyzing(true);
+      setDone(false);
+      setProgress(0);
+      setQuality(0);
+    } catch (error) {
+      console.error('Error processing voice file:', error);
+      toast({ title: '❌ Error al procesar', description: 'Intenta de nuevo.', variant: 'destructive' });
+    }
   }, []);
 
   useEffect(() => {
@@ -55,8 +63,13 @@ const VoiceLabPage = () => {
   const onDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
-    const file = e.dataTransfer.files[0];
-    if (file) handleFile(file);
+    try {
+      const file = e.dataTransfer.files[0];
+      if (file) handleFile(file);
+    } catch (error) {
+      console.error('Error on drop:', error);
+      toast({ title: '❌ Error', description: 'No se pudo cargar el archivo.', variant: 'destructive' });
+    }
   }, [handleFile]);
 
   const handleSaveProfile = () => {

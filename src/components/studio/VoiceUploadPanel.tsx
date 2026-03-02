@@ -4,6 +4,7 @@ import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { motion, AnimatePresence } from 'framer-motion';
+import { toast } from '@/hooks/use-toast';
 import elayneLogoImg from '@/assets/elayne-logo.png';
 
 interface VoiceUploadPanelProps {
@@ -19,12 +20,28 @@ export function VoiceUploadPanel({ voiceFile, setVoiceFile }: VoiceUploadPanelPr
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleFile = useCallback((file: File) => {
-    const valid = ['audio/mpeg', 'audio/wav', 'audio/mp3', 'audio/x-wav'];
-    if (!valid.some((t) => file.type.includes(t.split('/')[1]))) return;
-    setVoiceFile(file);
-    setAnalyzing(true);
-    setDone(false);
-    setProgress(0);
+    try {
+      const valid = ['audio/mpeg', 'audio/wav', 'audio/mp3', 'audio/x-wav'];
+      if (!valid.some((t) => file.type.includes(t.split('/')[1]))) {
+        toast({
+          title: '⚠️ Formato no válido',
+          description: 'Solo se aceptan archivos WAV o MP3.',
+          variant: 'destructive',
+        });
+        return;
+      }
+      setVoiceFile(file);
+      setAnalyzing(true);
+      setDone(false);
+      setProgress(0);
+    } catch (error) {
+      console.error('Error processing voice file:', error);
+      toast({
+        title: '❌ Error al procesar archivo',
+        description: 'Ocurrió un error inesperado. Intenta de nuevo.',
+        variant: 'destructive',
+      });
+    }
   }, [setVoiceFile]);
 
   // Simulate analysis progress
@@ -49,8 +66,17 @@ export function VoiceUploadPanel({ voiceFile, setVoiceFile }: VoiceUploadPanelPr
   const onDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
-    const file = e.dataTransfer.files[0];
-    if (file) handleFile(file);
+    try {
+      const file = e.dataTransfer.files[0];
+      if (file) handleFile(file);
+    } catch (error) {
+      console.error('Error on drop:', error);
+      toast({
+        title: '❌ Error al cargar archivo',
+        description: 'No se pudo procesar el archivo arrastrado.',
+        variant: 'destructive',
+      });
+    }
   }, [handleFile]);
 
   return (
