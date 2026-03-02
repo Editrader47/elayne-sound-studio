@@ -10,6 +10,7 @@ import LibraryPage from "./pages/LibraryPage";
 import VoicesPage from "./pages/VoicesPage";
 import VoiceLabPage from "./pages/VoiceLabPage";
 import AuthPage from "./pages/AuthPage";
+import ResetPasswordPage from "./pages/ResetPasswordPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -29,6 +30,7 @@ function AppRoutes() {
     return (
       <Routes>
         <Route path="/auth" element={<AuthPage />} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route path="*" element={<Navigate to="/auth" replace />} />
       </Routes>
     );

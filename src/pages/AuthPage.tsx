@@ -13,6 +13,24 @@ export default function AuthPage() {
   const [password, setPassword] = useState('');
   const [displayName, setDisplayName] = useState('');
   const [loading, setLoading] = useState(false);
+  const [forgotMode, setForgotMode] = useState(false);
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      if (error) throw error;
+      toast({ title: '📧 Correo enviado', description: 'Revisa tu bandeja para restablecer la contraseña.' });
+      setForgotMode(false);
+    } catch (err: any) {
+      toast({ title: 'Error', description: err.message, variant: 'destructive' });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,52 +74,53 @@ export default function AuthPage() {
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {!isLogin && (
+        {forgotMode ? (
+          <form onSubmit={handleForgotPassword} className="space-y-4">
             <div className="space-y-2">
-              <Label className="text-xs text-muted-foreground">Nombre</Label>
-              <Input
-                value={displayName}
-                onChange={(e) => setDisplayName(e.target.value)}
-                placeholder="Tu nombre artístico"
-                className="bg-secondary/50 border-border/40"
-              />
+              <Label className="text-xs text-muted-foreground">Correo electrónico</Label>
+              <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="tu@correo.com" required className="bg-secondary/50 border-border/40" />
             </div>
-          )}
-          <div className="space-y-2">
-            <Label className="text-xs text-muted-foreground">Correo electrónico</Label>
-            <Input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="tu@correo.com"
-              required
-              className="bg-secondary/50 border-border/40"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label className="text-xs text-muted-foreground">Contraseña</Label>
-            <Input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
-              required
-              minLength={6}
-              className="bg-secondary/50 border-border/40"
-            />
-          </div>
-          <Button type="submit" disabled={loading} className="w-full glow-button h-11">
-            {loading ? 'Cargando...' : isLogin ? 'Iniciar Sesión' : 'Crear Cuenta'}
-          </Button>
-        </form>
-
-        <p className="text-center text-xs text-muted-foreground">
-          {isLogin ? '¿No tienes cuenta?' : '¿Ya tienes cuenta?'}{' '}
-          <button onClick={() => setIsLogin(!isLogin)} className="text-primary hover:underline">
-            {isLogin ? 'Regístrate' : 'Inicia sesión'}
-          </button>
-        </p>
+            <Button type="submit" disabled={loading} className="w-full glow-button h-11">
+              {loading ? 'Enviando...' : 'Enviar enlace de recuperación'}
+            </Button>
+            <p className="text-center text-xs text-muted-foreground">
+              <button type="button" onClick={() => setForgotMode(false)} className="text-primary hover:underline">Volver al inicio de sesión</button>
+            </p>
+          </form>
+        ) : (
+          <>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {!isLogin && (
+                <div className="space-y-2">
+                  <Label className="text-xs text-muted-foreground">Nombre</Label>
+                  <Input value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="Tu nombre artístico" className="bg-secondary/50 border-border/40" />
+                </div>
+              )}
+              <div className="space-y-2">
+                <Label className="text-xs text-muted-foreground">Correo electrónico</Label>
+                <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="tu@correo.com" required className="bg-secondary/50 border-border/40" />
+              </div>
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <Label className="text-xs text-muted-foreground">Contraseña</Label>
+                  {isLogin && (
+                    <button type="button" onClick={() => setForgotMode(true)} className="text-xs text-primary hover:underline">¿Olvidaste tu contraseña?</button>
+                  )}
+                </div>
+                <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" required minLength={6} className="bg-secondary/50 border-border/40" />
+              </div>
+              <Button type="submit" disabled={loading} className="w-full glow-button h-11">
+                {loading ? 'Cargando...' : isLogin ? 'Iniciar Sesión' : 'Crear Cuenta'}
+              </Button>
+            </form>
+            <p className="text-center text-xs text-muted-foreground">
+              {isLogin ? '¿No tienes cuenta?' : '¿Ya tienes cuenta?'}{' '}
+              <button onClick={() => setIsLogin(!isLogin)} className="text-primary hover:underline">
+                {isLogin ? 'Regístrate' : 'Inicia sesión'}
+              </button>
+            </p>
+          </>
+        )}
       </motion.div>
     </div>
   );
