@@ -2,7 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
 serve(async (req) => {
@@ -11,7 +11,7 @@ serve(async (req) => {
   }
 
   try {
-    const AI_API_KEY = Deno.env.get("AI_MUSIC_API_KEY");
+    const REPLICATE_TOKEN = Deno.env.get("REPLICATE_API_TOKEN");
 
     const { prompt, genre, instrumental, highQuality, engine, lyrics } = await req.json();
 
@@ -22,70 +22,112 @@ serve(async (req) => {
       );
     }
 
-    // If no API key is configured, return a flag so the client falls back to mock
-    if (!AI_API_KEY) {
-      console.log("AI_MUSIC_API_KEY not configured – returning mock fallback signal");
+    if (!REPLICATE_TOKEN) {
       return new Response(
-        JSON.stringify({ fallback: true, message: "Motor de IA no configurado. Usando modo demo." }),
-        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        JSON.stringify({ error: "REPLICATE_API_TOKEN no configurado. Añade tu token en los secrets del proyecto." }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    // ─── REAL AI API CALL ───────────────────────────────────────
-    // Replace this block with your chosen AI music API (Replicate, Suno, Udio, etc.)
-    // The structure below is a template for a generic REST API call.
-    //
-    // Example for Replicate:
-    //   const response = await fetch("https://api.replicate.com/v1/predictions", { ... })
-    //
-    // Example for Suno:
-    //   const response = await fetch("https://api.suno.ai/v1/generate", { ... })
-    //
-    // Adapt the request body and response parsing to match your provider's spec.
-    // ────────────────────────────────────────────────────────────
+    // Build the full prompt
+    const fullPrompt = `${genre} style: ${prompt}${!instrumental && lyrics ? `. Lyrics: ${lyrics.substring(0, 200)}` : ""}`;
 
-    const apiResponse = await fetch("https://api.example.com/generate", {
+    // Create prediction
+    const createRes = await fetch("https://api.replicate.com/v1/predictions", {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${AI_API_KEY}`,
+        "Authorization": `Bearer ${REPLICATE_TOKEN}`,
         "Content-Type": "application/json",
+        "Prefer": "wait",
       },
       body: JSON.stringify({
-        prompt,
-        genre,
-        instrumental,
-        high_quality: highQuality,
-        engine,
-        lyrics: lyrics || undefined,
+        version: "671ac645ce5e552cc63a54a2bbff63fcf798043055f2a99f02cd694f32c0e3b0",
+        input: {
+          model_version: "stereo-melody-large",
+          prompt: fullPrompt,
+          duration: highQuality ? 15 : 8,
+          output_format: "mp3",
+          normalization_strategy: "peak",
+        },
       }),
     });
 
-    if (!apiResponse.ok) {
-      const errorBody = await apiResponse.text();
-      console.error(`AI API error [${apiResponse.status}]:`, errorBody);
+    if (!createRes.ok) {
+      const errText = await createRes.text();
+      console.error(`Replicate create error [${createRes.status}]:`, errText);
 
-      // Handle common errors
-      if (apiResponse.status === 402 || errorBody.includes("credits")) {
+      if (createRes.status === 401 || createRes.status === 403) {
         return new Response(
-          JSON.stringify({ error: "Sin créditos en el motor de IA. Recarga tu plan del proveedor." }),
+          JSON.stringify({ error: "Token de Replicate inválido. Verifica tu API Token." }),
+          { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      if (createRes.status === 402 || errText.includes("billing") || errText.includes("payment")) {
+        return new Response(
+          JSON.stringify({ error: "Sin créditos en Replicate. Recarga tu cuenta en replicate.com." }),
           { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
-
       return new Response(
-        JSON.stringify({ error: "Error de conexión con el motor de IA. Inténtalo de nuevo." }),
+        JSON.stringify({ error: "Error al conectar con Replicate. Inténtalo de nuevo." }),
         { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    const result = await apiResponse.json();
+    let prediction = await createRes.json();
+    console.log("Prediction created:", prediction.id, prediction.status);
 
-    // Adapt these fields to match your AI provider's response format
+    // Poll until completed (the "Prefer: wait" header should handle most cases,
+    // but we poll as fallback if status is not terminal)
+    const MAX_POLLS = 60; // ~3 minutes max
+    let polls = 0;
+
+    while (prediction.status !== "succeeded" && prediction.status !== "failed" && prediction.status !== "canceled") {
+      if (polls >= MAX_POLLS) {
+        return new Response(
+          JSON.stringify({ error: "La generación tardó demasiado. Inténtalo de nuevo con un prompt más corto." }),
+          { status: 504, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      await new Promise((r) => setTimeout(r, 3000));
+      polls++;
+
+      const pollRes = await fetch(`https://api.replicate.com/v1/predictions/${prediction.id}`, {
+        headers: { "Authorization": `Bearer ${REPLICATE_TOKEN}` },
+      });
+      prediction = await pollRes.json();
+      console.log(`Poll ${polls}: status=${prediction.status}`);
+    }
+
+    if (prediction.status === "failed" || prediction.status === "canceled") {
+      console.error("Prediction failed:", prediction.error);
+      return new Response(
+        JSON.stringify({ error: prediction.error || "La generación falló. Inténtalo con otro prompt." }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Extract audio URL from output
+    const audioUrl = typeof prediction.output === "string"
+      ? prediction.output
+      : Array.isArray(prediction.output)
+        ? prediction.output[0]
+        : null;
+
+    if (!audioUrl) {
+      console.error("No audio URL in output:", prediction.output);
+      return new Response(
+        JSON.stringify({ error: "No se recibió audio del modelo. Inténtalo de nuevo." }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     return new Response(
       JSON.stringify({
-        audio_url: result.audio_url || result.output?.audio_url || null,
-        title: result.title || null,
-        duration: result.duration || null,
+        audio_url: audioUrl,
+        title: null,
+        duration: highQuality ? 15 : 8,
       }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
