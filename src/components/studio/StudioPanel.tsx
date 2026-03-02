@@ -1,8 +1,8 @@
 import { useRef, useState } from 'react';
-import { Sparkles, Loader2, Music, Zap, FileText } from 'lucide-react';
+import { Sparkles, Loader2, Zap, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
@@ -17,10 +17,7 @@ import { EngineToggle } from './EngineToggle';
 import { QuickTags } from './QuickTags';
 import { toast } from '@/hooks/use-toast';
 
-const GENRES = [
-  'Reggaeton', 'Rock', 'Lo-fi', 'Trap', 'Pop', 'Hip-Hop',
-  'EDM', 'Jazz', 'Clásica', 'Synthwave', 'R&B', 'Ambient',
-];
+const GENRE_TAGS = ['Reggaeton', 'Rock', 'Lo-fi', 'Trap', 'Pop', 'Hip-Hop', 'EDM', 'Cumbia', 'Synthwave'];
 
 export function StudioPanel() {
   const {
@@ -162,29 +159,35 @@ export function StudioPanel() {
         <Textarea
           value={studioPrompt}
           onChange={(e) => setStudioPrompt(e.target.value)}
-          placeholder="Un beat lo-fi soñador con acordes cálidos de piano, suave crujido de vinilo y lluvia de fondo..."
+          placeholder="Describe tu ritmo aquí... Ej: Beat de tecnocumbia sonidera con sintetizadores brillantes y bajo pesado"
           className="min-h-[120px] bg-secondary/50 border-border/40 text-foreground placeholder:text-muted-foreground/40 resize-none focus:border-primary/50 focus:ring-primary/20 text-sm"
         />
       </div>
 
-      {/* Genre */}
+      {/* Genre - Free text */}
       <div className="space-y-2">
-        <Label className="text-xs uppercase tracking-wider text-muted-foreground">Género Musical</Label>
-        <Select value={studioGenre} onValueChange={setStudioGenre}>
-          <SelectTrigger className="bg-secondary/50 border-border/40">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent className="bg-card border-border">
-            {GENRES.map((g) => (
-              <SelectItem key={g} value={g}>
-                <span className="flex items-center gap-2">
-                  <Music className="w-3 h-3 text-primary/60" />
-                  {g}
-                </span>
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <Label className="text-xs uppercase tracking-wider text-muted-foreground">Estilo Musical</Label>
+        <Input
+          type="text"
+          value={studioGenre}
+          onChange={(e) => setStudioGenre(e.target.value)}
+          placeholder="Ej: Tecnocumbia sonidera, Reggaeton, Synthwave 130 BPM..."
+          className="bg-secondary/50 border-border/40 text-foreground placeholder:text-muted-foreground/40 focus:border-primary/50 focus:ring-primary/20 text-sm"
+        />
+        <div className="flex flex-wrap gap-1.5">
+          {GENRE_TAGS.map((tag) => (
+            <Button
+              key={tag}
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setStudioGenre(tag)}
+              className="h-7 text-[11px] border-border/40 text-muted-foreground hover:text-foreground hover:bg-secondary/80 transition-all"
+            >
+              {tag}
+            </Button>
+          ))}
+        </div>
       </div>
 
       {/* Toggles */}
@@ -268,7 +271,7 @@ export function StudioPanel() {
         ) : (
           <span className="flex items-center gap-2">
             <Sparkles className="w-5 h-5" />
-            Generar · {isJuno ? '10' : '5'} AC
+            Generar Magia · {isJuno ? '10' : '5'} AC
           </span>
         )}
       </Button>
