@@ -12,14 +12,14 @@ export function EngineToggle() {
         active={engine === 'suno'}
         onClick={() => setEngine('suno')}
         icon={<Zap className="w-3.5 h-3.5" />}
-        label="Rápido"
+        label="Modo Rápido"
       />
       <EngineButton
         mode="juno"
         active={engine === 'juno'}
         onClick={() => setEngine('juno')}
         icon={<Crown className="w-3.5 h-3.5" />}
-        label="Fidelidad Pro"
+        label="Modo Pro"
       />
     </div>
   );
