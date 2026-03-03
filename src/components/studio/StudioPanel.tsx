@@ -257,7 +257,7 @@ export function StudioPanel() {
       {/* Generate */}
       <Button
         onClick={handleGenerate}
-        disabled={!studioPrompt.trim() || isGenerating}
+        disabled={!studioPrompt.trim() || !studioGenre.trim() || isGenerating}
         className={`w-full h-12 text-base font-semibold rounded-xl ${
           isSuno ? 'glow-button-suno' : 'glow-button-juno'
         } ${isGenerating ? 'pulse-glow' : ''}`}
