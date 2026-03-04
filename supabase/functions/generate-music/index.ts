@@ -5,8 +5,8 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-// Unified predictions endpoint + official model identifier
 const REPLICATE_API_URL = "https://api.replicate.com/v1/predictions";
+const MUSICGEN_VERSION = "b05b1b3142ab1fceeecc2e1365e1c348ede5f3f0b0e528e9004c7e0689f8d66e";
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -47,10 +47,9 @@ serve(async (req) => {
       headers: {
         "Authorization": `Bearer ${REPLICATE_TOKEN}`,
         "Content-Type": "application/json",
-        "Prefer": "wait=60",
       },
       body: JSON.stringify({
-        model: "meta/musicgen",
+        version: MUSICGEN_VERSION,
         input: {
           model_version: "medium",
           prompt: fullPrompt,
