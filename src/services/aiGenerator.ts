@@ -31,7 +31,9 @@ export async function generateMusic(params: GenerateParams): Promise<Track> {
   });
 
   if (error) {
-    throw new Error('Error de conexión con el motor de IA. Inténtalo de nuevo.');
+    // Extract the actual error body if available
+    const msg = (error as any)?.context?.body?.error || (error as any)?.message || 'Error de conexión con el motor de IA.';
+    throw new Error(msg);
   }
 
   if (data?.error) {
