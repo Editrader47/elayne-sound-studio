@@ -8,56 +8,50 @@ const corsHeaders = {
 const REPLICATE_API_URL = "https://api.replicate.com/v1/predictions";
 const MUSICGEN_VERSION = "671ac645ce5e552cc63a54a2bbff63fcf798043055d2dac5fc9e36a837eedcfb";
 
-// Genre translation map: Spanish keywords → rich English descriptors for MusicGen
-const GENRE_TRANSLATIONS: Record<string, string> = {
-  cumbia: "90s Latin cumbia, tropical percussion, accordion melodies, steady cumbia rhythm, bright digital synthesizers, 110 BPM, high quality audio, tropical dance music",
-  tecnocumbia: "90s Latin technocumbia, sonidero style, bright digital synthesizers, Korg M1 piano sounds, electronic güira, steady cumbia percussion, 132 BPM, high quality audio, tropical dance music",
-  sonidera: "90s Latin technocumbia, sonidero style, bright digital synthesizers, Korg M1 piano sounds, electronic güira, steady cumbia percussion, 132 BPM, high quality audio, tropical dance music",
-  reggaeton: "modern reggaeton, dembow rhythm, heavy 808 bass, hi-hat rolls, Latin trap influence, 95 BPM, polished mix, dancehall energy, high quality audio",
-  trap: "Latin trap, heavy 808 sub bass, dark hi-hats, snare rolls, atmospheric pads, 140 BPM, high quality audio",
-  "hip-hop": "hip-hop boom bap, vinyl crackle, jazzy samples, punchy drums, deep bass, 90 BPM, high quality audio",
-  "lo-fi": "lo-fi hip-hop, warm vinyl crackle, mellow jazz chords, soft drums, relaxing atmosphere, 75 BPM, high quality audio",
-  pop: "modern pop, catchy melodies, polished production, bright synths, driving beat, 120 BPM, radio-ready, high quality audio",
-  rock: "energetic rock, electric guitars, driving drums, bass guitar, powerful energy, 130 BPM, high quality audio",
-  edm: "electronic dance music, big room synths, four-on-the-floor kick, build-ups and drops, 128 BPM, festival energy, high quality audio",
-  synthwave: "synthwave retro 80s, analog synthesizers, pulsing arpeggios, neon atmosphere, 110 BPM, cinematic, high quality audio",
+// Instrumentation dictionary: genre keywords → rich English descriptors
+const INSTRUMENTATION: Record<string, string> = {
+  cumbia: "analog synthesizer leads, iconic 90s digital cowbell, syncopated electronic bass, crisp güira, high-energy tropical percussion, 132 BPM",
+  tecnocumbia: "analog synthesizer leads, iconic 90s digital cowbell, syncopated electronic bass, crisp güira, high-energy tropical percussion, bright digital synthesizers, Korg M1 piano sounds, sonidero style, 132 BPM",
+  sonidera: "analog synthesizer leads, iconic 90s digital cowbell, syncopated electronic bass, crisp güira, high-energy tropical percussion, bright digital synthesizers, Korg M1 piano sounds, sonidero style, 132 BPM",
+  reggaeton: "aggressive dembow riddim, punchy kick drum, heavy sub-bass (808), crisp snares, modern club atmosphere, 90-95 BPM",
+  urbano: "aggressive dembow riddim, punchy kick drum, heavy sub-bass (808), crisp snares, modern club atmosphere, 90-95 BPM",
+  salsa: "authentic piano montuno, sharp brass section (trumpets/trombones), syncopated congas and timbales, energetic clave rhythm, 180 BPM",
+  tropical: "authentic piano montuno, sharp brass section (trumpets/trombones), syncopated congas and timbales, energetic clave rhythm, 180 BPM",
+  rock: "overdriven electric guitars, multi-layered drum kit, thick bass guitar, stadium reverb",
+  trap: "heavy 808 sub bass, dark hi-hats, snare rolls, atmospheric pads, 140 BPM",
+  "hip-hop": "boom bap drums, vinyl crackle, jazzy samples, punchy drums, deep bass, 90 BPM",
+  "lo-fi": "warm vinyl crackle, mellow jazz chords, soft drums, relaxing atmosphere, 75 BPM",
+  pop: "catchy melodies, polished production, bright synths, driving beat, 120 BPM",
+  edm: "big room synths, four-on-the-floor kick, build-ups and drops, 128 BPM, festival energy",
+  synthwave: "analog synthesizers, pulsing arpeggios, neon atmosphere, 110 BPM, cinematic retro 80s",
 };
 
-const NEGATIVE_PROMPT = "low quality, distorted, heavy metal, ambient noise, slow, sad, monotone, muddy mix";
+const NEGATIVE_PROMPT = "low quality, distorted, muffled, mono, static, white noise, out of tune, weak drums, amateur recording";
 
 /**
- * Translates a Spanish genre input into a rich English prompt for MusicGen.
- * Checks if any known keyword appears in the genre string.
+ * Builds a professional producer-grade prompt from genre + description.
  */
 function enhancePrompt(genre: string, description: string): string {
   const genreLower = genre.toLowerCase().trim();
 
-  // Find matching translation
-  let englishGenre = "";
-  for (const [keyword, translation] of Object.entries(GENRE_TRANSLATIONS)) {
+  // Find matching instrumentation
+  let instrumentation = "";
+  for (const [keyword, instr] of Object.entries(INSTRUMENTATION)) {
     if (genreLower.includes(keyword)) {
-      englishGenre = translation;
+      instrumentation = instr;
       break;
     }
   }
 
-  // Build the enhanced prompt
-  const parts: string[] = [];
+  const parts = [
+    `A professional ${genre} studio recording`,
+    `Features: ${description}`,
+    instrumentation ? `Instrumentation: ${instrumentation}` : null,
+    "High-fidelity audio, 44.1kHz, master quality, rich textures, perfectly balanced mix, dynamic range. Clear percussion, defined bassline, atmospheric depth",
+    `No: ${NEGATIVE_PROMPT}`,
+  ].filter(Boolean);
 
-  if (englishGenre) {
-    parts.push(englishGenre);
-  } else {
-    // Pass the genre as-is if no translation found
-    parts.push(genre);
-  }
-
-  // Add user description
-  parts.push(description);
-
-  // Add negative guidance
-  parts.push(`no ${NEGATIVE_PROMPT}`);
-
-  return parts.join(". ");
+  return parts.join(". ") + ".";
 }
 
 serve(async (req) => {
@@ -108,6 +102,7 @@ serve(async (req) => {
           output_format: "mp3",
           top_k: 250,
           temperature: 1.0,
+          classifier_free_guidance: 5.0,
         },
       }),
     });
