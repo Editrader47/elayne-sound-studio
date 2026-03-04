@@ -18,7 +18,12 @@ import { QuickTags } from './QuickTags';
 import { URBControls } from './URBControls';
 import { toast } from '@/hooks/use-toast';
 
-const GENRE_TAGS = ['Reggaeton', 'Trap', 'Cumbia', 'Tecnocumbia', 'Rock', 'Pop', 'Lo-fi', 'Hip-Hop', 'EDM', 'Synthwave', 'Techno', 'Drill', 'Worship', 'Afrobeat', 'Salsa', 'Bachata', 'Corrido Tumbado', 'Cinematic', 'Jazz', 'R&B'];
+const GENRE_TAGS = [
+  'Reggaeton', 'Trap Latino', 'Dembow', 'Tecnocumbia', 'Cumbia Electronica', 'Cumbia', 'Salsa', 'Bachata', 'Merengue',
+  'Corrido Tumbado', 'Banda', 'Norteña',
+  'Trap', 'Hip-Hop', 'R&B', 'Pop', 'Rock', 'EDM', 'Techno', 'House',
+  'Lo-fi', 'Synthwave', 'Drill', 'Afrobeat', 'Jazz', 'Cinematic', 'Worship',
+];
 
 export function StudioPanel() {
   const {
@@ -26,6 +31,7 @@ export function StudioPanel() {
     studioPrompt, setStudioPrompt, studioGenre, setStudioGenre,
     studioLyrics, setStudioLyrics, studioLyricsEnabled, setStudioLyricsEnabled,
     studioEnergy, studioBpm, studioDuration, studioComplexity,
+    studioClarity, studioAtmosphere, applyLatinSignature,
   } = useAudioStore();
   const { user } = useAuth();
 
@@ -71,22 +77,21 @@ export function StudioPanel() {
       return;
     }
 
-      toast({
-        title: `⚡ -${cost} Aliencoins usados`,
-        description: 'Motor de generación activado.',
-      });
+    toast({
+      title: `⚡ -${cost} Aliencoins usados`,
+      description: 'ELAYNE Creative Engine activado.',
+    });
 
     setIsGenerating(true);
-    setLoadingMessage(`Sintonizando frecuencias espectrales para ${studioGenre || 'tu estilo'}...`);
+    setLoadingMessage(`Analizando estructura rítmica para ${studioGenre || 'tu estilo'}...`);
 
-    // Rotate loading messages
     const messages = [
-      'ELAYNE está afinando los teclados sonideros...',
-      'Sintonizando frecuencias espectrales...',
-      'Procesando texturas fantasmales...',
-      'Conectando con el satélite musical...',
-      'Mezclando ondas espectrales con IA...',
-      'Casi listo, ecualizando el beat cósmico...',
+      'ELAYNE está componiendo con intención...',
+      'Diseñando estructura rítmica profesional...',
+      'Procesando texturas espectrales...',
+      'Aplicando claridad y evolución musical...',
+      'Mezclando con precisión de estudio...',
+      'Casi listo, masterizando el resultado...',
     ];
     let msgIdx = 0;
     const msgInterval = setInterval(() => {
@@ -106,22 +111,24 @@ export function StudioPanel() {
         bpm: studioBpm,
         duration: studioDuration,
         complexity: studioComplexity,
+        clarity: studioClarity,
+        atmosphere: studioAtmosphere,
+        applyLatinSignature,
       });
       addTrack(track);
       setCurrentTrack(track);
-      
-      // Save to database
+
       if (user) {
         const newBalance = aliencoins - cost;
         await saveSongToDB(track, user.id);
         await updateAliencoins(user.id, newBalance);
       }
-      
+
       setStudioPrompt('');
     } catch (err: any) {
       toast({
         title: '❌ Error de generación',
-        description: err?.message || 'Error de conexión con el motor de IA. Inténtalo de nuevo.',
+        description: err?.message || 'Error de conexión con ELAYNE. Inténtalo de nuevo.',
         variant: 'destructive',
       });
     } finally {
@@ -155,7 +162,7 @@ export function StudioPanel() {
             Panel de Generación
           </h2>
           <p className="text-xs text-muted-foreground">
-            Configura y genera tu próxima creación musical
+            {isSuno ? 'Creator Mode · Controles simples' : 'Pro Mode · Controles avanzados'}
           </p>
         </div>
       </div>
@@ -166,19 +173,19 @@ export function StudioPanel() {
         <Textarea
           value={studioPrompt}
           onChange={(e) => setStudioPrompt(e.target.value)}
-          placeholder="Describe tu ritmo aquí... Ej: Beat de tecnocumbia sonidera con sintetizadores brillantes y bajo pesado"
+          placeholder="Describe tu ritmo aquí... Ej: Reggaeton épico cristiano con mucha energía y groove latino"
           className="min-h-[120px] bg-secondary/50 border-border/40 text-foreground placeholder:text-muted-foreground/40 resize-none focus:border-primary/50 focus:ring-primary/20 text-sm"
         />
       </div>
 
-      {/* Genre - Free text */}
+      {/* Genre */}
       <div className="space-y-2">
         <Label className="text-xs uppercase tracking-wider text-muted-foreground">Estilo Musical</Label>
         <Input
           type="text"
           value={studioGenre}
           onChange={(e) => setStudioGenre(e.target.value)}
-          placeholder="Ej: Tecnocumbia sonidera, Reggaeton, Synthwave 130 BPM..."
+          placeholder="Ej: Reggaeton, Tecnocumbia, Trap Latino..."
           className="bg-secondary/50 border-border/40 text-foreground placeholder:text-muted-foreground/40 focus:border-primary/50 focus:ring-primary/20 text-sm"
         />
         <div className="flex flex-wrap gap-1.5">
@@ -189,7 +196,7 @@ export function StudioPanel() {
               variant="outline"
               size="sm"
               onClick={() => setStudioGenre(tag)}
-              className="h-7 text-[11px] bg-background/60 backdrop-blur-sm border-primary/30 text-muted-foreground hover:text-primary-foreground hover:bg-primary/20 hover:border-primary/60 hover:shadow-[0_0_12px_-2px_hsl(var(--glow)/0.5)] transition-all duration-300"
+              className="h-7 text-[11px] bg-background/60 backdrop-blur-sm border-[hsl(var(--glow-cyan)/0.3)] text-muted-foreground hover:text-primary-foreground hover:bg-[hsl(var(--glow-cyan)/0.15)] hover:border-[hsl(var(--glow-cyan)/0.6)] hover:shadow-[0_0_12px_-2px_hsl(var(--glow-cyan)/0.5)] transition-all duration-300"
             >
               {tag}
             </Button>
@@ -294,12 +301,12 @@ export function StudioPanel() {
         {isGenerating ? (
           <span className="flex items-center gap-2">
             <Loader2 className="w-5 h-5 animate-spin" />
-            {loadingMessage || 'Sintonizando frecuencias espectrales...'}
+            {loadingMessage || 'ELAYNE está componiendo...'}
           </span>
         ) : (
           <span className="flex items-center gap-2">
             <Sparkles className="w-5 h-5" />
-            Generar Magia · {isJuno ? '10' : '5'} AC
+            Generar · {isJuno ? '10' : '5'} AC
           </span>
         )}
       </Button>

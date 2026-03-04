@@ -6,10 +6,10 @@ const Index = () => {
     <div className="space-y-8 animate-slide-up">
       <div>
         <h1 className="text-2xl md:text-3xl font-black tracking-wider neon-logo">
-          ELAYNE IA SOUND
+          ELAYNE
         </h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Crea música con inteligencia artificial en segundos
+          Latin Pro Creative Engine · Creative Mind, Ray of Light
         </p>
       </div>
 
