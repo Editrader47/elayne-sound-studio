@@ -14,9 +14,8 @@ serve(async (req) => {
     const REPLICATE_TOKEN = Deno.env.get("REPLICATE_API_TOKEN");
 
     if (!REPLICATE_TOKEN) {
-      console.error("Token faltante: REPLICATE_API_TOKEN no configurado.");
       return new Response(
-        JSON.stringify({ error: "Token faltante: REPLICATE_API_TOKEN no configurado en Secrets." }),
+        JSON.stringify({ error: "[CONFIG] REPLICATE_API_TOKEN no configurado en Secrets." }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -25,7 +24,7 @@ serve(async (req) => {
 
     if (!prompt || !genre) {
       return new Response(
-        JSON.stringify({ error: "Faltan campos obligatorios: prompt y género." }),
+        JSON.stringify({ error: "[400] Faltan campos: prompt y género." }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -35,14 +34,15 @@ serve(async (req) => {
 
     console.log("Iniciando generación...", { genre, duration });
 
-    // Create prediction using official model
-    const createRes = await fetch("https://api.replicate.com/v1/models/meta/musicgen/predictions", {
+    // Use the stable versioned predictions endpoint
+    const createRes = await fetch("https://api.replicate.com/v1/predictions", {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${REPLICATE_TOKEN}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
+        version: "b05b1b3142ab1fceeecc2e1365e1c348ede5f3f0b0e528e9004c7e0689f8d66e",
         input: {
           model_version: "medium",
           prompt: fullPrompt,
@@ -57,40 +57,19 @@ serve(async (req) => {
       const errText = await createRes.text();
       console.error(`Replicate error [${createRes.status}]:`, errText);
 
-      if (createRes.status === 401 || createRes.status === 403) {
-        return new Response(
-          JSON.stringify({ error: "Token de API inválido o mal copiado. Verifica REPLICATE_API_TOKEN." }),
-          { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
-      if (createRes.status === 402 || errText.includes("billing") || errText.includes("payment")) {
-        return new Response(
-          JSON.stringify({ error: "Saldo insuficiente en Replicate. Recarga en replicate.com/account/billing." }),
-          { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
-      if (createRes.status === 429) {
-        return new Response(
-          JSON.stringify({ error: "Demasiadas solicitudes. Espera unos segundos e inténtalo de nuevo." }),
-          { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
       return new Response(
-        JSON.stringify({ error: "Error al conectar con Replicate. Inténtalo de nuevo." }),
-        { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        JSON.stringify({ error: `[${createRes.status}] ${errText.substring(0, 200)}` }),
+        { status: createRes.status, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
     let prediction = await createRes.json();
 
-    // Poll every 4s, max 20 attempts (80s total)
-    const MAX_POLLS = 20;
+    const MAX_POLLS = 22;
     const POLL_INTERVAL = 4000;
 
     for (let i = 0; i < MAX_POLLS; i++) {
-      if (prediction.status === "succeeded" || prediction.status === "failed" || prediction.status === "canceled") {
-        break;
-      }
+      if (prediction.status === "succeeded" || prediction.status === "failed" || prediction.status === "canceled") break;
       await new Promise((r) => setTimeout(r, POLL_INTERVAL));
 
       const pollRes = await fetch(`https://api.replicate.com/v1/predictions/${prediction.id}`, {
@@ -102,14 +81,14 @@ serve(async (req) => {
     if (prediction.status === "failed" || prediction.status === "canceled") {
       console.error("Prediction failed:", prediction.error);
       return new Response(
-        JSON.stringify({ error: "La generación falló en Replicate. Inténtalo de nuevo." }),
+        JSON.stringify({ error: `[FAILED] ${prediction.error || "Generación falló en Replicate."}` }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
     if (prediction.status !== "succeeded") {
       return new Response(
-        JSON.stringify({ error: "Tiempo de espera agotado. Inténtalo de nuevo." }),
+        JSON.stringify({ error: "[TIMEOUT] Tiempo agotado tras 88s. Reintenta." }),
         { status: 504, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -122,7 +101,7 @@ serve(async (req) => {
 
     if (!audioUrl) {
       return new Response(
-        JSON.stringify({ error: "No se recibió audio. Revisa tu cuenta en Replicate." }),
+        JSON.stringify({ error: "[EMPTY] Replicate no devolvió audio. Revisa tu cuenta." }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -136,7 +115,7 @@ serve(async (req) => {
   } catch (error) {
     console.error("Edge function error:", error);
     return new Response(
-      JSON.stringify({ error: "Error interno del servidor. Inténtalo de nuevo." }),
+      JSON.stringify({ error: `[INTERNAL] ${error?.message || "Error desconocido."}` }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
