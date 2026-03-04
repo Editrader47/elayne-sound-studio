@@ -23,7 +23,7 @@ function randomTitle(): string {
 
 /**
  * Calls the backend function to generate music via Replicate MusicGen.
- * No mock fallback — requires a configured API token.
+ * No mock fallback — requires a configured REPLICATE_API_TOKEN secret.
  */
 export async function generateMusic(params: GenerateParams): Promise<Track> {
   const { data, error } = await supabase.functions.invoke('generate-music', {
@@ -39,14 +39,14 @@ export async function generateMusic(params: GenerateParams): Promise<Track> {
   }
 
   if (!data?.audio_url) {
-    throw new Error('No se recibió audio del motor de IA. Inténtalo de nuevo.');
+    throw new Error('No se recibió audio del motor de IA.');
   }
 
   return {
     id: crypto.randomUUID(),
     title: data.title || randomTitle(),
     genre: params.genre,
-    duration: data.duration || Math.floor(120 + Math.random() * 180),
+    duration: data.duration || 15,
     createdAt: new Date(),
     prompt: params.prompt,
     instrumental: params.instrumental,
