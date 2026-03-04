@@ -5,8 +5,9 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const REPLICATE_API_URL = "https://api.replicate.com/v1/predictions";
-const MUSICGEN_VERSION = "7a76a8258a23fa9203066a9088ce2653ca2f32729352e008c353846e3793740e";
+// Use official model endpoint — no version hash needed, always uses latest stable
+const REPLICATE_MODEL_URL = "https://api.replicate.com/v1/models/facebook/musicgen/predictions";
+const REPLICATE_POLL_BASE = "https://api.replicate.com/v1/predictions";
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -18,7 +19,7 @@ serve(async (req) => {
 
     if (!REPLICATE_TOKEN) {
       return new Response(
-        JSON.stringify({ error: "[CONFIG] REPLICATE_API_TOKEN no configurado en Secrets." }),
+        JSON.stringify({ error: "REPLICATE_API_TOKEN no configurado en Secrets." }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -30,7 +31,7 @@ serve(async (req) => {
       );
     }
 
-    const { prompt, genre, instrumental, highQuality, lyrics } = await req.json();
+    const { prompt, genre } = await req.json();
 
     if (!prompt || !genre) {
       return new Response(
@@ -42,14 +43,13 @@ serve(async (req) => {
     const fullPrompt = `${genre}: ${prompt}`;
     console.log("Iniciando generación...", { genre, duration: 15 });
 
-    const createRes = await fetch(REPLICATE_API_URL, {
+    const createRes = await fetch(REPLICATE_MODEL_URL, {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${REPLICATE_TOKEN}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        version: MUSICGEN_VERSION,
         input: {
           model_version: "medium",
           prompt: fullPrompt,
@@ -85,12 +85,12 @@ serve(async (req) => {
     let prediction = await createRes.json();
     const predictionId = prediction.id;
 
-    // Polling: 20 intentos x 5s = 100s máximo
+    // Polling: 20 attempts x 5s = 100s max
     for (let i = 0; i < 20; i++) {
       if (prediction.status === "succeeded" || prediction.status === "failed" || prediction.status === "canceled") break;
       await new Promise((r) => setTimeout(r, 5000));
 
-      const pollRes = await fetch(`${REPLICATE_API_URL}/${predictionId}`, {
+      const pollRes = await fetch(`${REPLICATE_POLL_BASE}/${predictionId}`, {
         headers: { "Authorization": `Bearer ${REPLICATE_TOKEN}` },
       });
 
@@ -109,7 +109,7 @@ serve(async (req) => {
     if (prediction.status === "failed" || prediction.status === "canceled") {
       console.error("Prediction failed:", prediction.error);
       return new Response(
-        JSON.stringify({ error: `Generación falló: ${prediction.error || "Error desconocido en Replicate."}` }),
+        JSON.stringify({ error: `Generación falló: ${prediction.error || "Error desconocido."}` }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -121,7 +121,6 @@ serve(async (req) => {
       );
     }
 
-    // Extract audio URL from output
     const audioUrl = typeof prediction.output === "string"
       ? prediction.output
       : Array.isArray(prediction.output) && prediction.output.length > 0
