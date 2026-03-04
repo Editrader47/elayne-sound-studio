@@ -1,34 +1,49 @@
 
 
-## Plan: Desbloquear inputs del Studio y renombrar motores
+## Diagnóstico
 
-### Cambios en `src/components/studio/StudioPanel.tsx`
+El error de los logs es claro:
 
-1. **Reemplazar Select de Género por Input de texto libre**
-   - Eliminar el `<Select>` dropdown (líneas 170-188) y reemplazarlo con un `<Input type="text">` que permita escribir cualquier estilo (ej: "Tecnocumbia Sonidera 132 BPM").
-   - Placeholder: `"Ej: Tecnocumbia sonidera, Reggaeton, Synthwave 130 BPM..."`.
-   - Debajo del input, agregar quick-tag buttons con los géneros populares (Reggaeton, Rock, Lo-fi, Trap, Pop, etc.) que al hacer clic rellenen el input.
-   - Mantener estilo glassmorphism: `bg-secondary/50 border-border/40`.
+```
+"version is required"
+"Additional property model is not allowed"
+```
 
-2. **Textarea sin restricciones**
-   - Confirmar que no hay `maxLength` en el textarea de prompt (no lo hay actualmente, solo verificar).
-   - Cambiar placeholder a: `"Describe tu ritmo aquí... Ej: Beat de tecnocumbia sonidera con sintetizadores brillantes y bajo pesado"`.
+El endpoint `/v1/predictions` **no acepta** el campo `model`. Requiere el campo `version` con el hash del modelo. El código actual envía `model: "meta/musicgen"` lo cual es rechazado con 422.
 
-3. **Eliminar import de Select** ya que no se usará más.
+## Plan: Reescribir Edge Function desde cero
 
-4. **Eliminar la constante `GENRES`** (ya no necesaria como array cerrado, se convierte en quick-tags).
+Un solo cambio en `supabase/functions/generate-music/index.ts` — reemplazar el body del request:
 
-### Cambios en `src/components/studio/EngineToggle.tsx`
+**Antes (incorrecto):**
+```json
+{
+  "model": "meta/musicgen",
+  "input": { "model_version": "medium", "prompt": "...", "duration": 15, "output_format": "mp3" }
+}
+```
 
-5. **Renombrar labels de motores**
-   - "Rápido" → "Modo Rápido"
-   - "Fidelidad Pro" → "Modo Pro"
+**Después (correcto para `/v1/predictions`):**
+```json
+{
+  "version": "b05b1b3142ab1fceeecc2e1365e1c348ede5f3f0b0e528e9004c7e0689f8d66e",
+  "input": { "model_version": "medium", "prompt": "...", "duration": 15, "output_format": "mp3" }
+}
+```
 
-### Cambios en `src/components/studio/StudioPanel.tsx` (botón)
+El version hash `b05b1b3142ab1fceeecc2e1365e1c348ede5f3f0b0e528e9004c7e0689f8d66e` es el oficial de `meta/musicgen` medium en Replicate.
 
-6. **Renombrar texto del botón**
-   - Cambiar "Generar" a "Generar Magia" en el botón.
+### Cambios específicos
 
-### Sin cambios en backend
-- El `generateMusic` service ya envía `genre` como string libre al Edge Function. No requiere modificación.
+1. **`supabase/functions/generate-music/index.ts`** — Reescribir completo:
+   - Quitar `model: "meta/musicgen"`, usar `version: "b05b1b3142ab1fceeecc2e1365e1c348ede5f3f0b0e528e9004c7e0689f8d66e"`
+   - Quitar header `Prefer: wait=60` (puede causar timeouts en edge functions)
+   - Mantener polling de 5s × 20 intentos
+   - Mantener validación de token `r8_`
+   - Mantener manejo de errores 401/402 con mensajes claros
+   - Mantener CORS headers
+
+2. **Redesplegar** la Edge Function tras el cambio.
+
+No hay cambios en frontend — el problema es exclusivamente el formato del request a Replicate.
 
