@@ -8,6 +8,10 @@ export interface GenerateParams {
   highQuality: boolean;
   engine: EngineMode;
   lyrics?: string;
+  energy?: number;
+  bpm?: number;
+  duration?: number;
+  complexity?: number;
 }
 
 const TITLE_WORDS = [
@@ -21,17 +25,20 @@ function randomTitle(): string {
   return `${a} ${b}`;
 }
 
-/**
- * Calls the backend function to generate music via Replicate MusicGen.
- * No mock fallback — requires a configured REPLICATE_API_TOKEN secret.
- */
 export async function generateMusic(params: GenerateParams): Promise<Track> {
   const { data, error } = await supabase.functions.invoke('generate-music', {
-    body: params,
+    body: {
+      prompt: params.prompt,
+      genre: params.genre,
+      instrumental: params.instrumental,
+      energy: params.energy,
+      bpm: params.bpm && params.bpm > 0 ? params.bpm : undefined,
+      duration: params.duration || 15,
+      complexity: params.complexity,
+    },
   });
 
   if (error) {
-    // Extract the actual error body if available
     const msg = (error as any)?.context?.body?.error || (error as any)?.message || 'Error de conexión con el motor de IA.';
     throw new Error(msg);
   }
@@ -48,7 +55,7 @@ export async function generateMusic(params: GenerateParams): Promise<Track> {
     id: crypto.randomUUID(),
     title: data.title || randomTitle(),
     genre: params.genre,
-    duration: data.duration || 15,
+    duration: data.duration || params.duration || 15,
     createdAt: new Date(),
     prompt: params.prompt,
     instrumental: params.instrumental,
@@ -56,5 +63,8 @@ export async function generateMusic(params: GenerateParams): Promise<Track> {
     audioUrl: data.audio_url,
     engine: params.engine,
     lyrics: params.lyrics,
+    bpm: data.bpm,
+    energy: params.energy,
+    complexity: params.complexity,
   };
 }

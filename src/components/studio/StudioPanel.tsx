@@ -15,15 +15,17 @@ import { LyricsPanel } from './LyricsPanel';
 import { VoiceUploadPanel } from './VoiceUploadPanel';
 import { EngineToggle } from './EngineToggle';
 import { QuickTags } from './QuickTags';
+import { URBControls } from './URBControls';
 import { toast } from '@/hooks/use-toast';
 
-const GENRE_TAGS = ['Reggaeton', 'Rock', 'Lo-fi', 'Trap', 'Pop', 'Hip-Hop', 'EDM', 'Cumbia', 'Synthwave'];
+const GENRE_TAGS = ['Reggaeton', 'Trap', 'Cumbia', 'Tecnocumbia', 'Rock', 'Pop', 'Lo-fi', 'Hip-Hop', 'EDM', 'Synthwave', 'Techno', 'Drill', 'Worship', 'Afrobeat', 'Salsa', 'Bachata', 'Corrido Tumbado', 'Cinematic', 'Jazz', 'R&B'];
 
 export function StudioPanel() {
   const {
     engine, isGenerating, setIsGenerating, addTrack, setCurrentTrack, spendCoins, aliencoins,
     studioPrompt, setStudioPrompt, studioGenre, setStudioGenre,
     studioLyrics, setStudioLyrics, studioLyricsEnabled, setStudioLyricsEnabled,
+    studioEnergy, studioBpm, studioDuration, studioComplexity,
   } = useAudioStore();
   const { user } = useAuth();
 
@@ -100,6 +102,10 @@ export function StudioPanel() {
         highQuality,
         engine,
         lyrics: studioLyricsEnabled ? studioLyrics : undefined,
+        energy: studioEnergy,
+        bpm: studioBpm,
+        duration: studioDuration,
+        complexity: studioComplexity,
       });
       addTrack(track);
       setCurrentTrack(track);
@@ -202,6 +208,11 @@ export function StudioPanel() {
           <Label className="text-sm text-foreground/80">Render Alta Calidad</Label>
         </div>
       </div>
+
+      <Separator className="bg-border/30" />
+
+      {/* URB Controls */}
+      <URBControls />
 
       <Separator className="bg-border/30" />
 
