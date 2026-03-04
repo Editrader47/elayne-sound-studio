@@ -1,49 +1,34 @@
 
 
-## Diagnóstico
+## Plan: Motor de Prompts de Ingeniería Musical + UI Dinámica
 
-El error de los logs es claro:
+### Cambios en `supabase/functions/generate-music/index.ts`
 
+**1. Nuevo diccionario de instrumentación** — Reemplazar `GENRE_TRANSLATIONS` con mapeo más rico:
+- **Cumbia/Tecnocumbia/Sonidera**: "analog synthesizer leads, iconic 90s digital cowbell, syncopated electronic bass, crisp güira, high-energy tropical percussion, 132 BPM"
+- **Reggaeton/Urbano**: "aggressive dembow riddim, punchy kick drum, heavy sub-bass (808), crisp snares, modern club atmosphere, 90-95 BPM"
+- **Salsa/Tropical**: "authentic piano montuno, sharp brass section (trumpets/trombones), syncopated congas and timbales, energetic clave rhythm, 180 BPM"
+- **Rock**: "overdriven electric guitars, multi-layered drum kit, thick bass guitar, stadium reverb"
+- Mantener los demás géneros existentes (Trap, Hip-Hop, Lo-fi, Pop, EDM, Synthwave)
+
+**2. Nueva función `enhancePrompt`** — Estructura de productor:
 ```
-"version is required"
-"Additional property model is not allowed"
-```
-
-El endpoint `/v1/predictions` **no acepta** el campo `model`. Requiere el campo `version` con el hash del modelo. El código actual envía `model: "meta/musicgen"` lo cual es rechazado con 422.
-
-## Plan: Reescribir Edge Function desde cero
-
-Un solo cambio en `supabase/functions/generate-music/index.ts` — reemplazar el body del request:
-
-**Antes (incorrecto):**
-```json
-{
-  "model": "meta/musicgen",
-  "input": { "model_version": "medium", "prompt": "...", "duration": 15, "output_format": "mp3" }
-}
+"A professional [GENRE] studio recording. Features: [DESCRIPTION]. [INSTRUMENTATION]. 
+High-fidelity audio, 44.1kHz, master quality, rich textures, perfectly balanced mix, 
+dynamic range. Clear percussion, defined bassline, atmospheric depth. 
+No: low quality, distorted, muffled, mono, static, white noise, out of tune, weak drums, amateur recording"
 ```
 
-**Después (correcto para `/v1/predictions`):**
-```json
-{
-  "version": "b05b1b3142ab1fceeecc2e1365e1c348ede5f3f0b0e528e9004c7e0689f8d66e",
-  "input": { "model_version": "medium", "prompt": "...", "duration": 15, "output_format": "mp3" }
-}
-```
+**3. Nuevo parámetro Replicate**: Añadir `classifier_free_guidance: 5.0` al input JSON (junto con los existentes `top_k: 250`, `temperature: 1.0`).
 
-El version hash `b05b1b3142ab1fceeecc2e1365e1c348ede5f3f0b0e528e9004c7e0689f8d66e` es el oficial de `meta/musicgen` medium en Replicate.
+**4. Negative prompt actualizado**: "low quality, distorted, muffled, mono, static, white noise, out of tune, weak drums, amateur recording"
 
-### Cambios específicos
+### Cambios en `src/components/studio/StudioPanel.tsx`
 
-1. **`supabase/functions/generate-music/index.ts`** — Reescribir completo:
-   - Quitar `model: "meta/musicgen"`, usar `version: "b05b1b3142ab1fceeecc2e1365e1c348ede5f3f0b0e528e9004c7e0689f8d66e"`
-   - Quitar header `Prefer: wait=60` (puede causar timeouts en edge functions)
-   - Mantener polling de 5s × 20 intentos
-   - Mantener validación de token `r8_`
-   - Mantener manejo de errores 401/402 con mensajes claros
-   - Mantener CORS headers
+**5. Mensaje dinámico de loading**: Cambiar el primer mensaje a `"Analizando estructura rítmica para ${studioGenre}..."` usando el género actual del usuario. Mantener los demás mensajes rotativos.
 
-2. **Redesplegar** la Edge Function tras el cambio.
+### Despliegue
+- Redesplegar la Edge Function `generate-music`.
 
-No hay cambios en frontend — el problema es exclusivamente el formato del request a Replicate.
+No hay cambios en base de datos ni en frontend service layer.
 
