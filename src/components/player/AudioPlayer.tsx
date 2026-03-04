@@ -98,7 +98,7 @@ export function AudioPlayer() {
   };
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 bg-[hsl(var(--player-bg))]/95 backdrop-blur-xl border-t border-border/30">
+    <div className="fixed bottom-0 left-0 right-0 z-50 bg-[hsl(var(--player-bg))] backdrop-blur-xl border-t border-[hsl(var(--glow-cyan)/0.15)]">
       {/* Waveform */}
       <div className="px-4 pt-2">
         <WaveformVisualizer onSeek={handleSeek} duration={duration} />

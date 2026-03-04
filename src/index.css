@@ -54,8 +54,8 @@
     --surface: 222 47% 8%;
     --surface-hover: 222 47% 12%;
     --waveform: 180 100% 50%;
-    --waveform-progress: 330 90% 60%;
-    --player-bg: 222 47% 4%;
+    --waveform-progress: 300 100% 60%;
+    --player-bg: 222 60% 3%;
     --neon-gradient: linear-gradient(135deg, hsl(180, 100%, 50%), hsl(280, 80%, 60%));
 
     /* Engine tokens */
@@ -163,11 +163,36 @@
     50% { transform: scaleY(1); opacity: 1; }
   }
 
+  @keyframes spectralPulse {
+    0%, 100% {
+      box-shadow: 0 0 8px hsl(180 100% 50% / 0.3), 0 0 16px hsl(300 100% 60% / 0.15);
+    }
+    50% {
+      box-shadow: 0 0 16px hsl(180 100% 50% / 0.5), 0 0 32px hsl(300 100% 60% / 0.3);
+    }
+  }
+
+  @keyframes spectralWave {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
   .animate-slide-up {
     animation: slideUp 0.4s ease-out;
   }
 
   .animate-dna-helix {
     animation: dnaHelix 3s linear infinite;
+  }
+
+  .animate-spectral-pulse {
+    animation: spectralPulse 2s ease-in-out infinite;
+  }
+
+  .spectral-gradient {
+    background: linear-gradient(270deg, hsl(180, 100%, 50%), hsl(300, 100%, 60%), hsl(180, 100%, 50%));
+    background-size: 200% 200%;
+    animation: spectralWave 3s ease infinite;
   }
 }

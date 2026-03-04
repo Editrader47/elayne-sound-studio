@@ -75,16 +75,16 @@ export function StudioPanel() {
       });
 
     setIsGenerating(true);
-    setLoadingMessage(`Analizando estructura rítmica para ${studioGenre || 'tu estilo'}...`);
+    setLoadingMessage(`Sintonizando frecuencias espectrales para ${studioGenre || 'tu estilo'}...`);
 
     // Rotate loading messages
     const messages = [
       'ELAYNE está afinando los teclados sonideros...',
-      'ELAYNE está componiendo tu música original...',
+      'Sintonizando frecuencias espectrales...',
+      'Procesando texturas fantasmales...',
       'Conectando con el satélite musical...',
-      'Mezclando frecuencias con IA...',
-      'Procesando ondas sonoras...',
-      'Casi listo, ecualizando el beat...',
+      'Mezclando ondas espectrales con IA...',
+      'Casi listo, ecualizando el beat cósmico...',
     ];
     let msgIdx = 0;
     const msgInterval = setInterval(() => {
@@ -183,7 +183,7 @@ export function StudioPanel() {
               variant="outline"
               size="sm"
               onClick={() => setStudioGenre(tag)}
-              className="h-7 text-[11px] border-border/40 text-muted-foreground hover:text-foreground hover:bg-secondary/80 transition-all"
+              className="h-7 text-[11px] bg-background/60 backdrop-blur-sm border-primary/30 text-muted-foreground hover:text-primary-foreground hover:bg-primary/20 hover:border-primary/60 hover:shadow-[0_0_12px_-2px_hsl(var(--glow)/0.5)] transition-all duration-300"
             >
               {tag}
             </Button>
@@ -255,19 +255,35 @@ export function StudioPanel() {
       {/* Voice Upload */}
       <VoiceUploadPanel voiceFile={voiceFile} setVoiceFile={setVoiceFile} />
 
+      {/* Spectral Loading Animation */}
+      <AnimatePresence>
+        {isGenerating && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="overflow-hidden"
+          >
+            <div className="h-1.5 w-full rounded-full overflow-hidden">
+              <div className="h-full spectral-gradient rounded-full" />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Generate */}
       <Button
         onClick={handleGenerate}
         disabled={!studioPrompt.trim() || !studioGenre.trim() || isGenerating}
         className={`w-full h-12 text-base font-semibold rounded-xl ${
           isSuno ? 'glow-button-suno' : 'glow-button-juno'
-        } ${isGenerating ? 'pulse-glow' : ''}`}
+        } ${isGenerating ? 'animate-spectral-pulse' : ''}`}
         size="lg"
       >
         {isGenerating ? (
           <span className="flex items-center gap-2">
             <Loader2 className="w-5 h-5 animate-spin" />
-            {studioGenre ? `Componiendo ${studioGenre}...` : (loadingMessage || 'Generando...')}
+            {loadingMessage || 'Sintonizando frecuencias espectrales...'}
           </span>
         ) : (
           <span className="flex items-center gap-2">
