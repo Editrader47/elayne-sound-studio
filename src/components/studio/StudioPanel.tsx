@@ -75,7 +75,7 @@ export function StudioPanel() {
       });
 
     setIsGenerating(true);
-    setLoadingMessage('ELAYNE está afinando los teclados sonideros...');
+    setLoadingMessage(`Analizando estructura rítmica para ${studioGenre || 'tu estilo'}...`);
 
     // Rotate loading messages
     const messages = [
