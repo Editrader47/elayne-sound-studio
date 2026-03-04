@@ -6,7 +6,7 @@ const corsHeaders = {
 };
 
 const REPLICATE_API_URL = "https://api.replicate.com/v1/predictions";
-const MUSICGEN_VERSION = "b05b1b3142ab1fceeecc2e1365e1c348ede5f3f0b0e528e9004c7e0689f8d66e";
+const MUSICGEN_VERSION = "671ac645ce5e552cc63a54a2bbff63fcf798043055d2dac5fc9e36a837eedcfb";
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -51,7 +51,6 @@ serve(async (req) => {
       body: JSON.stringify({
         version: MUSICGEN_VERSION,
         input: {
-          model_version: "medium",
           prompt: fullPrompt,
           duration: 15,
           output_format: "mp3",
