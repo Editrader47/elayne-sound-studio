@@ -14,6 +14,9 @@ export interface Track {
   audioUrl?: string;
   engine: EngineMode;
   lyrics?: string;
+  bpm?: number;
+  energy?: number;
+  complexity?: number;
 }
 
 export interface VoiceProfile {
@@ -69,6 +72,16 @@ interface AudioState {
   setStudioLyrics: (lyrics: string) => void;
   studioLyricsEnabled: boolean;
   setStudioLyricsEnabled: (enabled: boolean) => void;
+
+  // URB controls
+  studioEnergy: number;
+  setStudioEnergy: (energy: number) => void;
+  studioBpm: number;
+  setStudioBpm: (bpm: number) => void;
+  studioDuration: number;
+  setStudioDuration: (duration: number) => void;
+  studioComplexity: number;
+  setStudioComplexity: (complexity: number) => void;
 }
 
 export const useAudioStore = create<AudioState>((set, get) => ({
@@ -114,4 +127,14 @@ export const useAudioStore = create<AudioState>((set, get) => ({
   setStudioLyrics: (studioLyrics) => set({ studioLyrics }),
   studioLyricsEnabled: false,
   setStudioLyricsEnabled: (studioLyricsEnabled) => set({ studioLyricsEnabled }),
+
+  // URB defaults
+  studioEnergy: 3,
+  setStudioEnergy: (studioEnergy) => set({ studioEnergy }),
+  studioBpm: 0, // 0 = auto
+  setStudioBpm: (studioBpm) => set({ studioBpm }),
+  studioDuration: 15,
+  setStudioDuration: (studioDuration) => set({ studioDuration }),
+  studioComplexity: 3,
+  setStudioComplexity: (studioComplexity) => set({ studioComplexity }),
 }));
