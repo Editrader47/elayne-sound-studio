@@ -5,9 +5,8 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-// Use official model endpoint — no version hash needed, always uses latest stable
-const REPLICATE_MODEL_URL = "https://api.replicate.com/v1/models/facebook/musicgen/predictions";
-const REPLICATE_POLL_BASE = "https://api.replicate.com/v1/predictions";
+// Unified predictions endpoint + official model identifier
+const REPLICATE_API_URL = "https://api.replicate.com/v1/predictions";
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -41,15 +40,17 @@ serve(async (req) => {
     }
 
     const fullPrompt = `${genre}: ${prompt}`;
-    console.log("Iniciando generación...", { genre, duration: 15 });
+    console.log("Iniciando generación...", { genre, prompt: fullPrompt, duration: 15 });
 
-    const createRes = await fetch(REPLICATE_MODEL_URL, {
+    const createRes = await fetch(REPLICATE_API_URL, {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${REPLICATE_TOKEN}`,
         "Content-Type": "application/json",
+        "Prefer": "wait=60",
       },
       body: JSON.stringify({
+        model: "meta/musicgen",
         input: {
           model_version: "medium",
           prompt: fullPrompt,
@@ -65,13 +66,13 @@ serve(async (req) => {
 
       if (createRes.status === 401) {
         return new Response(
-          JSON.stringify({ error: "Token de API inválido o expirado. Revisa tu REPLICATE_API_TOKEN." }),
+          JSON.stringify({ error: `[401] Token inválido o expirado. Revisa REPLICATE_API_TOKEN.` }),
           { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
       if (createRes.status === 402) {
         return new Response(
-          JSON.stringify({ error: "Saldo insuficiente en Replicate. Recarga en replicate.com/account/billing" }),
+          JSON.stringify({ error: `[402] Saldo insuficiente en Replicate. Recarga en replicate.com/account/billing` }),
           { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
@@ -90,7 +91,7 @@ serve(async (req) => {
       if (prediction.status === "succeeded" || prediction.status === "failed" || prediction.status === "canceled") break;
       await new Promise((r) => setTimeout(r, 5000));
 
-      const pollRes = await fetch(`${REPLICATE_POLL_BASE}/${predictionId}`, {
+      const pollRes = await fetch(`${REPLICATE_API_URL}/${predictionId}`, {
         headers: { "Authorization": `Bearer ${REPLICATE_TOKEN}` },
       });
 
@@ -98,7 +99,7 @@ serve(async (req) => {
         const pollErr = await pollRes.text();
         console.error(`Polling error [${pollRes.status}]:`, pollErr);
         return new Response(
-          JSON.stringify({ error: `Error de polling [${pollRes.status}]: ${pollErr.substring(0, 200)}` }),
+          JSON.stringify({ error: `[POLL ${pollRes.status}] ${pollErr.substring(0, 200)}` }),
           { status: pollRes.status, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
@@ -134,7 +135,7 @@ serve(async (req) => {
       );
     }
 
-    console.log("Audio recibido:", audioUrl);
+    console.log("Audio generado:", audioUrl);
 
     return new Response(
       JSON.stringify({ audio_url: audioUrl, duration: 15 }),
