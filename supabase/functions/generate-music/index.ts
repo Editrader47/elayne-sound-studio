@@ -26,19 +26,33 @@ const INSTRUMENTATION: Record<string, string> = {
   synthwave: "analog synthesizers, pulsing arpeggios, neon atmosphere, 110 BPM, cinematic retro 80s",
 };
 
+// Spectral effects by genre
+const SPECTRAL_FX: Record<string, string> = {
+  tecnocumbia: "spacey synthesizer echoes, cosmic reverb on cowbells, crystalline digital delays",
+  sonidera: "spacey synthesizer echoes, cosmic reverb on cowbells, crystalline digital delays",
+  cumbia: "spacey synthesizer echoes, cosmic reverb on cowbells, crystalline digital delays",
+  urbano: "haunting atmospheric textures, cinematic sub-bass, dark spectral whispers",
+  trap: "haunting atmospheric textures, cinematic sub-bass, dark spectral whispers",
+  reggaeton: "haunting atmospheric textures, cinematic sub-bass, dark spectral whispers",
+};
+
+const SPECTRAL_BASE = "spectral soundscapes, wide stereo imaging, immersive spatial audio, ethereal pads, high-frequency clarity, deep ambient resonance, phase-shifted textures";
+
 const NEGATIVE_PROMPT = "low quality, distorted, muffled, mono, static, white noise, out of tune, weak drums, amateur recording";
 
 /**
- * Builds a professional producer-grade prompt from genre + description.
+ * Builds a professional producer-grade prompt with spectral atmosphere.
  */
 function enhancePrompt(genre: string, description: string): string {
   const genreLower = genre.toLowerCase().trim();
 
   // Find matching instrumentation
   let instrumentation = "";
+  let spectralFx = "";
   for (const [keyword, instr] of Object.entries(INSTRUMENTATION)) {
     if (genreLower.includes(keyword)) {
       instrumentation = instr;
+      spectralFx = SPECTRAL_FX[keyword] || "";
       break;
     }
   }
@@ -47,6 +61,8 @@ function enhancePrompt(genre: string, description: string): string {
     `A professional ${genre} studio recording`,
     `Features: ${description}`,
     instrumentation ? `Instrumentation: ${instrumentation}` : null,
+    `Atmosphere: ${SPECTRAL_BASE}`,
+    spectralFx ? `Effects: ${spectralFx}` : null,
     "High-fidelity audio, 44.1kHz, master quality, rich textures, perfectly balanced mix, dynamic range. Clear percussion, defined bassline, atmospheric depth",
     `No: ${NEGATIVE_PROMPT}`,
   ].filter(Boolean);
@@ -101,7 +117,7 @@ serve(async (req) => {
           duration: 15,
           output_format: "mp3",
           top_k: 250,
-          temperature: 1.0,
+          temperature: 1.2,
           classifier_free_guidance: 5.0,
         },
       }),
