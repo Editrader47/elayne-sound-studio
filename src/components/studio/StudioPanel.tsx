@@ -266,7 +266,7 @@ export function StudioPanel() {
         {isGenerating ? (
           <span className="flex items-center gap-2">
             <Loader2 className="w-5 h-5 animate-spin" />
-            {loadingMessage || 'Generando...'}
+            {studioGenre ? `Componiendo ${studioGenre}...` : (loadingMessage || 'Generando...')}
           </span>
         ) : (
           <span className="flex items-center gap-2">
