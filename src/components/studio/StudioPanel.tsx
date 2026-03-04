@@ -75,15 +75,16 @@ export function StudioPanel() {
       });
 
     setIsGenerating(true);
-    setLoadingMessage('Conectando con el satélite musical...');
+    setLoadingMessage('ELAYNE está afinando los teclados sonideros...');
 
     // Rotate loading messages
     const messages = [
+      'ELAYNE está afinando los teclados sonideros...',
       'ELAYNE está componiendo tu música original...',
       'Conectando con el satélite musical...',
-      'Generando audio con IA...',
+      'Mezclando frecuencias con IA...',
       'Procesando ondas sonoras...',
-      'Casi listo, afinando frecuencias...',
+      'Casi listo, ecualizando el beat...',
     ];
     let msgIdx = 0;
     const msgInterval = setInterval(() => {

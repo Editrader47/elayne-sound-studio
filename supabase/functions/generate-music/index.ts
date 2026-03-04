@@ -8,6 +8,58 @@ const corsHeaders = {
 const REPLICATE_API_URL = "https://api.replicate.com/v1/predictions";
 const MUSICGEN_VERSION = "671ac645ce5e552cc63a54a2bbff63fcf798043055d2dac5fc9e36a837eedcfb";
 
+// Genre translation map: Spanish keywords → rich English descriptors for MusicGen
+const GENRE_TRANSLATIONS: Record<string, string> = {
+  cumbia: "90s Latin cumbia, tropical percussion, accordion melodies, steady cumbia rhythm, bright digital synthesizers, 110 BPM, high quality audio, tropical dance music",
+  tecnocumbia: "90s Latin technocumbia, sonidero style, bright digital synthesizers, Korg M1 piano sounds, electronic güira, steady cumbia percussion, 132 BPM, high quality audio, tropical dance music",
+  sonidera: "90s Latin technocumbia, sonidero style, bright digital synthesizers, Korg M1 piano sounds, electronic güira, steady cumbia percussion, 132 BPM, high quality audio, tropical dance music",
+  reggaeton: "modern reggaeton, dembow rhythm, heavy 808 bass, hi-hat rolls, Latin trap influence, 95 BPM, polished mix, dancehall energy, high quality audio",
+  trap: "Latin trap, heavy 808 sub bass, dark hi-hats, snare rolls, atmospheric pads, 140 BPM, high quality audio",
+  "hip-hop": "hip-hop boom bap, vinyl crackle, jazzy samples, punchy drums, deep bass, 90 BPM, high quality audio",
+  "lo-fi": "lo-fi hip-hop, warm vinyl crackle, mellow jazz chords, soft drums, relaxing atmosphere, 75 BPM, high quality audio",
+  pop: "modern pop, catchy melodies, polished production, bright synths, driving beat, 120 BPM, radio-ready, high quality audio",
+  rock: "energetic rock, electric guitars, driving drums, bass guitar, powerful energy, 130 BPM, high quality audio",
+  edm: "electronic dance music, big room synths, four-on-the-floor kick, build-ups and drops, 128 BPM, festival energy, high quality audio",
+  synthwave: "synthwave retro 80s, analog synthesizers, pulsing arpeggios, neon atmosphere, 110 BPM, cinematic, high quality audio",
+};
+
+const NEGATIVE_PROMPT = "low quality, distorted, heavy metal, ambient noise, slow, sad, monotone, muddy mix";
+
+/**
+ * Translates a Spanish genre input into a rich English prompt for MusicGen.
+ * Checks if any known keyword appears in the genre string.
+ */
+function enhancePrompt(genre: string, description: string): string {
+  const genreLower = genre.toLowerCase().trim();
+
+  // Find matching translation
+  let englishGenre = "";
+  for (const [keyword, translation] of Object.entries(GENRE_TRANSLATIONS)) {
+    if (genreLower.includes(keyword)) {
+      englishGenre = translation;
+      break;
+    }
+  }
+
+  // Build the enhanced prompt
+  const parts: string[] = [];
+
+  if (englishGenre) {
+    parts.push(englishGenre);
+  } else {
+    // Pass the genre as-is if no translation found
+    parts.push(genre);
+  }
+
+  // Add user description
+  parts.push(description);
+
+  // Add negative guidance
+  parts.push(`no ${NEGATIVE_PROMPT}`);
+
+  return parts.join(". ");
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -39,8 +91,8 @@ serve(async (req) => {
       );
     }
 
-    const fullPrompt = `${genre}: ${prompt}`;
-    console.log("Iniciando generación...", { genre, prompt: fullPrompt, duration: 15 });
+    const enhancedPrompt = enhancePrompt(genre, prompt);
+    console.log("Prompt mejorado:", enhancedPrompt);
 
     const createRes = await fetch(REPLICATE_API_URL, {
       method: "POST",
@@ -51,9 +103,11 @@ serve(async (req) => {
       body: JSON.stringify({
         version: MUSICGEN_VERSION,
         input: {
-          prompt: fullPrompt,
+          prompt: enhancedPrompt,
           duration: 15,
           output_format: "mp3",
+          top_k: 250,
+          temperature: 1.0,
         },
       }),
     });
