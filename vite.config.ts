@@ -20,9 +20,9 @@ export default defineConfig(({ mode }) => ({
       registerType: "autoUpdate",
       includeAssets: ["favicon.ico"],
       manifest: {
-        name: "ELAYNE IA SOUND",
-        short_name: "ELAYNE IA",
-        description: "Professional AI Music & Audio Generation Studio",
+        name: "ELAYNE",
+        short_name: "ELAYNE",
+        description: "Latin Pro Creative Engine — Creative Mind, Ray of Light",
         theme_color: "#0f1629",
         background_color: "#0a0e1a",
         display: "standalone",

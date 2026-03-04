@@ -12,6 +12,9 @@ export interface GenerateParams {
   bpm?: number;
   duration?: number;
   complexity?: number;
+  clarity?: number;
+  atmosphere?: string;
+  applyLatinSignature?: boolean;
 }
 
 const TITLE_WORDS = [
@@ -35,6 +38,9 @@ export async function generateMusic(params: GenerateParams): Promise<Track> {
       bpm: params.bpm && params.bpm > 0 ? params.bpm : undefined,
       duration: params.duration || 15,
       complexity: params.complexity,
+      clarity: params.clarity,
+      atmosphere: params.atmosphere,
+      applyLatinSignature: params.applyLatinSignature,
     },
   });
 
@@ -66,5 +72,6 @@ export async function generateMusic(params: GenerateParams): Promise<Track> {
     bpm: data.bpm,
     energy: params.energy,
     complexity: params.complexity,
+    clarity: params.clarity,
   };
 }

@@ -17,22 +17,21 @@ export interface Track {
   bpm?: number;
   energy?: number;
   complexity?: number;
+  clarity?: number;
 }
 
 export interface VoiceProfile {
   id: string;
   name: string;
   fileName: string;
-  quality: number; // 0-100
+  quality: number;
   createdAt: Date;
 }
 
 interface AudioState {
-  // Library
   tracks: Track[];
   addTrack: (track: Track) => void;
 
-  // Player
   currentTrack: Track | null;
   isPlaying: boolean;
   currentTime: number;
@@ -45,25 +44,20 @@ interface AudioState {
   setVolume: (vol: number) => void;
   setSpeed: (speed: number) => void;
 
-  // Generation
   isGenerating: boolean;
   setIsGenerating: (gen: boolean) => void;
 
-  // Engine
   engine: EngineMode;
   setEngine: (engine: EngineMode) => void;
 
-  // Economy
   aliencoins: number;
   setAliencoins: (coins: number) => void;
   spendCoins: (amount: number) => boolean;
   addCoins: (amount: number) => void;
 
-  // Voice profiles
   voiceProfiles: VoiceProfile[];
   addVoiceProfile: (profile: VoiceProfile) => void;
 
-  // Studio state persistence
   studioPrompt: string;
   setStudioPrompt: (prompt: string) => void;
   studioGenre: string;
@@ -82,6 +76,18 @@ interface AudioState {
   setStudioDuration: (duration: number) => void;
   studioComplexity: number;
   setStudioComplexity: (complexity: number) => void;
+
+  // Clarity System (ELAYNE Signature)
+  studioClarity: number;
+  setStudioClarity: (clarity: number) => void;
+
+  // Atmosphere
+  studioAtmosphere: string;
+  setStudioAtmosphere: (atmosphere: string) => void;
+
+  // Latin Signature toggle
+  applyLatinSignature: boolean;
+  setApplyLatinSignature: (apply: boolean) => void;
 }
 
 export const useAudioStore = create<AudioState>((set, get) => ({
@@ -121,7 +127,7 @@ export const useAudioStore = create<AudioState>((set, get) => ({
 
   studioPrompt: '',
   setStudioPrompt: (studioPrompt) => set({ studioPrompt }),
-  studioGenre: 'Lo-fi',
+  studioGenre: 'Reggaeton',
   setStudioGenre: (studioGenre) => set({ studioGenre }),
   studioLyrics: '',
   setStudioLyrics: (studioLyrics) => set({ studioLyrics }),
@@ -131,10 +137,22 @@ export const useAudioStore = create<AudioState>((set, get) => ({
   // URB defaults
   studioEnergy: 3,
   setStudioEnergy: (studioEnergy) => set({ studioEnergy }),
-  studioBpm: 0, // 0 = auto
+  studioBpm: 0,
   setStudioBpm: (studioBpm) => set({ studioBpm }),
   studioDuration: 15,
   setStudioDuration: (studioDuration) => set({ studioDuration }),
   studioComplexity: 3,
   setStudioComplexity: (studioComplexity) => set({ studioComplexity }),
+
+  // Clarity (ELAYNE Signature — "Ray of Light")
+  studioClarity: 65,
+  setStudioClarity: (studioClarity) => set({ studioClarity }),
+
+  // Atmosphere
+  studioAtmosphere: 'balanced',
+  setStudioAtmosphere: (studioAtmosphere) => set({ studioAtmosphere }),
+
+  // Latin Signature
+  applyLatinSignature: false,
+  setApplyLatinSignature: (applyLatinSignature) => set({ applyLatinSignature }),
 }));
