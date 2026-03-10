@@ -902,10 +902,11 @@ serve(async (req) => {
       JSON.stringify({ audio_url: audioUrl, duration: reqDuration, bpm: urb.bpm }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("Edge function error:", error);
+    const msg = error instanceof Error ? error.message : "Error desconocido.";
     return new Response(
-      JSON.stringify({ error: `[INTERNAL] ${error?.message || "Error desconocido."}` }),
+      JSON.stringify({ error: `[INTERNAL] ${msg}` }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
